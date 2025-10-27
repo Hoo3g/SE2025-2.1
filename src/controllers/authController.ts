@@ -1,7 +1,10 @@
-import { Request, Response } from 'express';
+import express from 'express';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+
+type Request = express.Request;
+type Response = express.Response;
 
 const prisma = new PrismaClient();
 
@@ -26,6 +29,68 @@ const passwordSchema = z.object({
 });
 
 export const authController = {
+  // OIDC endpoints
+  discovery: async (_req: Request, res: Response) => {
+    res.json({
+      issuer: 'https://auth.example.com',
+      authorization_endpoint: 'https://auth.example.com/authorize',
+      token_endpoint: 'https://auth.example.com/token',
+      userinfo_endpoint: 'https://auth.example.com/userinfo',
+      jwks_uri: 'https://auth.example.com/.well-known/jwks.json',
+      response_types_supported: ['code'],
+      subject_types_supported: ['public'],
+      id_token_signing_alg_values_supported: ['RS256'],
+      scopes_supported: ['openid', 'profile', 'email'],
+      token_endpoint_auth_methods_supported: ['client_secret_basic'],
+      claims_supported: ['sub', 'iss', 'email', 'email_verified']
+    });
+  },
+
+  authorize: async (req: Request, res: Response) => {
+    const { client_id, redirect_uri, response_type, scope, state } = req.query;
+    
+    // TODO: Validate client_id and redirect_uri
+    // For now, store these in session and redirect to login
+    res.redirect(`/login?redirect_uri=${redirect_uri}&state=${state}`);
+  },
+
+  token: async (req: Request, res: Response) => {
+    const { grant_type, code } = req.body;
+    
+    if (grant_type !== 'authorization_code') {
+      return res.status(400).json({ error: 'unsupported_grant_type' });
+    }
+
+    // TODO: Validate authorization code
+    // For now return dummy token
+    res.json({
+      access_token: 'dummy_access_token',
+      token_type: 'Bearer',
+      expires_in: 3600,
+      id_token: 'dummy_id_token'
+    });
+  },
+
+  userinfo: async (req: Request, res: Response) => {
+    // User info should be attached by verifyToken middleware
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ error: 'invalid_token' });
+    }
+
+    res.json({
+      sub: user.sub,
+      email: user.email,
+      email_verified: user.email_verified
+    });
+  },
+
+  logout: async (req: Request, res: Response) => {
+    // For now just send success response
+    res.json({ success: true });
+  },
+
+  // Authentication endpoints
   signup: async (req: Request, res: Response) => {
     try {
       const { email, password } = signupSchema.parse(req.body);

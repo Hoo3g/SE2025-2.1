@@ -1,4 +1,6 @@
-export const BASE_URL = process.env.BASE_URL || 'https://id.asset3d.io';
+// For development, always use localhost
+const DEV_MODE = process.env.NODE_ENV !== 'production';
+export const BASE_URL = DEV_MODE ? 'http://localhost:3000' : (process.env.BASE_URL || 'https://id.asset3d.io');
 export const JWT_ISSUER = BASE_URL;
 export const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'asset3d-clients';
 export const EMAIL_FROM = process.env.EMAIL_FROM || 'no-reply@asset3d.io';

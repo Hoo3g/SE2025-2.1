@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config/jwt';
+import { JWT_SECRET } from '../config/jwt.js';
 
 const prisma = new PrismaClient();
 
@@ -113,6 +113,75 @@ export const apiController = {
       // if the token has been revoked successfully or if the client submitted
       // an invalid token
       res.status(200).send();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'invalid_request',
+          error_description: error.issues[0].message
+        });
+      }
+      res.status(500).json({
+        error: 'server_error',
+        error_description: 'An internal server error occurred'
+      });
+    }
+  },
+
+  // User Profile endpoints
+  getProfile: async (req: Request, res: Response) => {
+    try {
+      if (!req.user?.sub) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.sub }
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        email_verified: !!user.emailVerifiedAt,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'server_error',
+        error_description: 'An internal server error occurred'
+      });
+    }
+  },
+
+  updateProfile: async (req: Request, res: Response) => {
+    try {
+      if (!req.user?.sub) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const updateSchema = z.object({
+        email: z.string().email().optional(),
+        // Add other updatable fields here
+      });
+
+      const updates = updateSchema.parse(req.body);
+
+      const user = await prisma.user.update({
+        where: { id: req.user.sub },
+        data: updates
+      });
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        email_verified: !!user.emailVerifiedAt,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({

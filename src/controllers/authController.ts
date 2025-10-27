@@ -1,118 +1,162 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
-import { loginForm, signupForm, settingsForm, changePasswordForm } from '../views/forms.js';
+import { z } from 'zod';
 
 const prisma = new PrismaClient();
 
-export const authController = {
-  // Signup
-  showSignupForm: (req: Request, res: Response) => {
-    res.send(signupForm());
-  },
+// Validation schemas
+const signupSchema = z.object({
+  email: z.string().email('Email không hợp lệ'),
+  password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+});
 
+const loginSchema = z.object({
+  email: z.string().email('Email không hợp lệ'),
+  password: z.string()
+});
+
+const settingsSchema = z.object({
+  displayName: z.string().min(1, 'Tên hiển thị không được để trống')
+});
+
+const passwordSchema = z.object({
+  currentPassword: z.string(),
+  newPassword: z.string().min(8, 'Mật khẩu mới phải có ít nhất 8 ký tự')
+});
+
+export const authController = {
   signup: async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const { email, password } = signupSchema.parse(req.body);
       
-      // Check if user exists
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
-        return res.send(signupForm('Email đã được sử dụng'));
+        return res.status(400).json({ error: 'Email đã được sử dụng' });
       }
 
-      // Create user
       const passwordHash = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
-        data: { email, passwordHash }
+        data: { 
+          email, 
+          passwordHash,
+          subject: `user-${Date.now()}` // Generate OIDC subject
+        }
       });
 
-      // Set session
-      req.session.userId = user.id;
-      res.redirect('/settings');
+      res.status(201).json({
+        id: user.id,
+        email: user.email,
+        subject: user.subject
+      });
     } catch (error) {
-      res.send(signupForm('Có lỗi xảy ra khi đăng ký'));
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.issues[0].message });
+      }
+      res.status(500).json({ error: 'Có lỗi xảy ra khi đăng ký' });
     }
-  },
-
-  // Login
-  showLoginForm: (req: Request, res: Response) => {
-    res.send(loginForm());
   },
 
   login: async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const { email, password } = loginSchema.parse(req.body);
       
       const user = await prisma.user.findUnique({ where: { email } });
       if (!user) {
-        return res.send(loginForm('Email hoặc mật khẩu không đúng'));
+        return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng' });
       }
 
       const valid = await bcrypt.compare(password, user.passwordHash);
       if (!valid) {
-        return res.send(loginForm('Email hoặc mật khẩu không đúng'));
+        return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng' });
       }
 
-      req.session.userId = user.id;
-      const returnTo = req.session.returnTo || '/settings';
-      delete req.session.returnTo;
-      res.redirect(returnTo);
+      res.json({
+        id: user.id,
+        email: user.email,
+        subject: user.subject
+      });
     } catch (error) {
-      res.send(loginForm('Có lỗi xảy ra khi đăng nhập'));
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.issues[0].message });
+      }
+      res.status(500).json({ error: 'Có lỗi xảy ra khi đăng nhập' });
     }
   },
 
-  // Settings
-  showSettings: async (req: Request, res: Response) => {
+  getSettings: async (req: Request, res: Response) => {
     try {
+      const userId = req.headers['x-user-id'];
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
       const user = await prisma.user.findUnique({
-        where: { id: req.session.userId }
+        where: { id: String(userId) }
       });
-      res.send(settingsForm(user));
+
+      if (!user) {
+        return res.status(404).json({ error: 'Người dùng không tồn tại' });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        emailVerified: user.emailVerified
+      });
     } catch (error) {
-      res.send('Có lỗi xảy ra khi tải thông tin người dùng');
+      res.status(500).json({ error: 'Có lỗi xảy ra khi tải thông tin người dùng' });
     }
   },
 
   updateSettings: async (req: Request, res: Response) => {
     try {
-      const { displayName } = req.body;
+      const userId = req.headers['x-user-id'];
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { displayName } = settingsSchema.parse(req.body);
       
-      await prisma.user.update({
-        where: { id: req.session.userId },
+      const user = await prisma.user.update({
+        where: { id: String(userId) },
         data: { displayName }
       });
 
-      const user = await prisma.user.findUnique({
-        where: { id: req.session.userId }
+      res.json({
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName
       });
-      res.send(settingsForm(user, 'Cập nhật thông tin thành công'));
     } catch (error) {
-      res.send('Có lỗi xảy ra khi cập nhật thông tin');
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.issues[0].message });
+      }
+      res.status(500).json({ error: 'Có lỗi xảy ra khi cập nhật thông tin' });
     }
-  },
-
-  // Change Password
-  showChangePasswordForm: (req: Request, res: Response) => {
-    res.send(changePasswordForm());
   },
 
   changePassword: async (req: Request, res: Response) => {
     try {
-      const { currentPassword, newPassword } = req.body;
+      const userId = req.headers['x-user-id'];
+      if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { currentPassword, newPassword } = passwordSchema.parse(req.body);
       
       const user = await prisma.user.findUnique({
-        where: { id: req.session.userId }
+        where: { id: String(userId) }
       });
 
       if (!user) {
-        return res.send(changePasswordForm('Người dùng không tồn tại'));
+        return res.status(404).json({ error: 'Người dùng không tồn tại' });
       }
 
       const valid = await bcrypt.compare(currentPassword, user.passwordHash);
       if (!valid) {
-        return res.send(changePasswordForm('Mật khẩu hiện tại không đúng'));
+        return res.status(401).json({ error: 'Mật khẩu hiện tại không đúng' });
       }
 
       const passwordHash = await bcrypt.hash(newPassword, 10);
@@ -121,9 +165,12 @@ export const authController = {
         data: { passwordHash }
       });
 
-      res.send(changePasswordForm('Đổi mật khẩu thành công'));
+      res.json({ message: 'Đổi mật khẩu thành công' });
     } catch (error) {
-      res.send(changePasswordForm('Có lỗi xảy ra khi đổi mật khẩu'));
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.issues[0].message });
+      }
+      res.status(500).json({ error: 'Có lỗi xảy ra khi đổi mật khẩu' });
     }
   }
 };

@@ -1,11 +1,17 @@
 import { Router } from 'express';
-import { oidcController } from '../controllers/oidcController.js';
-import { isAuthenticated } from '../middleware/auth.js';
+import { authController } from '../controllers/authController.js';
+import { verifyToken } from '../middleware/verifyToken.js';
 
 export const router = Router();
 
-// OAuth/OIDC routes
-router.get('/authorize', isAuthenticated, oidcController.authorize);
-router.post('/token', oidcController.token);
-router.get('/userinfo', isAuthenticated, oidcController.userinfo);
-router.get('/.well-known/openid-configuration', oidcController.discovery);
+// Authentication endpoints
+router.post('/signup', authController.signup);
+router.post('/login', authController.login);
+router.post('/logout', verifyToken, authController.logout);
+router.post('/change-password', verifyToken, authController.changePassword);
+
+// OIDC endpoints
+router.get('/.well-known/openid-configuration', authController.discovery);
+router.get('/authorize', authController.authorize);
+router.post('/token', authController.token);
+router.get('/userinfo', verifyToken, authController.userinfo);

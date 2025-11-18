@@ -11,6 +11,28 @@ export const authController = {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
+      // ✅ Kiểm tra định dạng email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
+
+      // Kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ và số
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      if (!passwordRegex.test(password)) {
+        return res.status(400).json({
+          error: "Password must be at least 8 characters long and contain both letters and numbers",
+        });
+      }
+
+      // Kiểm tra số điện thoại: 10 chữ số, bắt đầu bằng 0
+      const phoneRegex = /^0\d{9}$/;
+      if (!phoneRegex.test(phoneNumber)) {
+        return res.status(400).json({
+          error: "Phone number must be 10 digits and start with 0",
+        });
+      }
+
       const { user, token } = await userService.createUser({
         firstName,
         lastName,

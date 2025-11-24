@@ -10,10 +10,10 @@ export const userService = {
     phoneNumber,
     password,
   }: {
-    firstName: string;
-    lastName: string;
+    firstName?: string;
+    lastName?: string;
     email: string;
-    phoneNumber: string;
+    phoneNumber?: string;
     password: string;
   }) {
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -23,10 +23,10 @@ export const userService = {
 
     const user = await prisma.user.create({
       data: {
-        first_name: firstName,
-        last_name: lastName,
+        first_name: firstName || "",
+        last_name: lastName || "",
         email,
-        phone_number: phoneNumber,
+        phone_number: phoneNumber || "",
         password: passwordHash,
         role: "USER",
         status: "NOT_ACTIVE",
@@ -68,5 +68,11 @@ export const userService = {
     });
 
     return record.user;
+  },
+
+  async findByEmail(email: string) {
+    return prisma.user.findUnique({
+      where: { email },
+    });
   },
 };

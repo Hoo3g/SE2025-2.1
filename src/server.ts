@@ -2,8 +2,8 @@ import express from 'express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { Provider } from 'oidc-provider';
-import { router as authRouter } from './routes/auth.js';
-import { router as apiRouter } from './routes/api.js';
+import authRouter from './routes/auth.js';
+import apiRouter from './routes/api.js';
 import { oidcConfig } from './config/oidc.js';
 import { BASE_URL } from './config.js';
 

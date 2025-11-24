@@ -5,17 +5,13 @@ import { sendVerifyEmail } from "../auth/email";
 export const authController = {
   async signup(req: Request, res: Response) {
     try {
-      const { firstName, lastName, email, phoneNumber, password } = req.body;
+      const {  email, password } = req.body;
 
-      if (!firstName || !lastName || !email || !phoneNumber || !password) {
+      if (!email || !password) {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
-      // ✅ Kiểm tra định dạng email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: "Invalid email format" });
-      }
+      
 
       // Kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ và số
       const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
@@ -25,19 +21,15 @@ export const authController = {
         });
       }
 
-      // Kiểm tra số điện thoại: 10 chữ số, bắt đầu bằng 0
-      const phoneRegex = /^0\d{9}$/;
-      if (!phoneRegex.test(phoneNumber)) {
-        return res.status(400).json({
-          error: "Phone number must be 10 digits and start with 0",
-        });
+      // Check email tồn tại
+      const existingUser = await userService.findByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "Email already exists" });
       }
 
+
       const { user, token } = await userService.createUser({
-        firstName,
-        lastName,
         email,
-        phoneNumber,
         password,
       });
 

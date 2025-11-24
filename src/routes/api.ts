@@ -1,8 +1,13 @@
-import { Router } from "express";
-import authRoutes from "./auth";
+import { Router } from 'express';
+import { apiController } from '../controllers/apiController.js';
+import { verifyToken } from '../middleware/verifyToken.js';
 
-const router = Router();
+export const router = Router();
 
-router.use("/auth", authRoutes);
+// Token management
+router.post('/token/refresh', apiController.refreshToken);
+router.post('/token/revoke', verifyToken, apiController.revokeToken);
 
-export default router;
+// Protected resources
+router.get('/me', verifyToken, apiController.getProfile);
+router.patch('/me', verifyToken, apiController.updateProfile);

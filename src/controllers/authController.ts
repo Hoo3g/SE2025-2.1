@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
-import { userService } from "../services/userService";
-import { sendVerifyEmail } from "../auth/email";
+import { userService } from "../services/userService.js";
+import { sendVerifyEmail } from "../auth/email.js";
+import { issueToken } from "../services/tokenService.js";
+
 
 export const authController = {
   async signup(req: Request, res: Response) {
@@ -40,6 +42,30 @@ export const authController = {
       });
     } catch (err: any) {
       res.status(400).json({ error: err.message });
+    }
+  },
+
+  async signin(req: Request, res: Response) {
+    try {
+      const { email, password, redirect_url } = req.body;
+
+      if (!email || !password || !redirect_url) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // gọi service để xử lý đăng nhập
+      const user = await userService.signIn(email, password);
+
+      // sinh token
+      const token = await issueToken({ id: user.id_user, email: user.email });
+
+      // redirect về redirect_url kèm token
+      const url = new URL(redirect_url);
+      url.searchParams.set("token", token);
+
+      return res.redirect(url.toString());
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message });
     }
   },
 

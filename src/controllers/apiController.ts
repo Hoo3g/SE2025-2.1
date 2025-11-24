@@ -22,15 +22,15 @@ export const apiController = {
       const { refresh_token } = refreshTokenSchema.parse(req.body);
       
       // Verify the refresh token
-      const token = await prisma.token.findUnique({
-        where: { 
-          value: refresh_token,
+      const token = await prisma.token.findFirst({
+        where: {
+          token_value: refresh_token,
           type: 'refresh_token'
         },
         include: { user: true }
       });
 
-      if (!token || token.expiresAt < new Date()) {
+      if (!token || token.expires_at < new Date()) {
         return res.status(401).json({
           error: 'invalid_grant',
           error_description: 'Refresh token is invalid or expired'
@@ -39,8 +39,8 @@ export const apiController = {
 
       // Generate new access token - 1 hour validity
       const accessToken = jwt.sign(
-        { 
-          sub: token.user.subject,
+        {
+          sub: String(token.user.id_user),
           email: token.user.email
         },
         JWT_SECRET,
@@ -48,11 +48,7 @@ export const apiController = {
       );
 
       // Generate new refresh token - 30 days validity
-      const newRefreshToken = jwt.sign(
-        { type: 'refresh' },
-        JWT_SECRET,
-        { expiresIn: '30d' }
-      );
+      const newRefreshToken = jwt.sign({ type: 'refresh' }, JWT_SECRET, { expiresIn: '30d' });
 
       // Update tokens in database
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
@@ -61,15 +57,16 @@ export const apiController = {
         prisma.token.create({
           data: {
             type: 'refresh_token',
-            value: newRefreshToken,
-            userId: token.userId,
-            clientId: token.clientId,
-            expiresAt
+            token_value: newRefreshToken,
+            user_id: token.user_id,
+            client_id: token.client_id,
+            expires_at: expiresAt,
+            scope: token.scope
           }
         }),
         // Delete old refresh token
         prisma.token.delete({
-          where: { id: token.id }
+          where: { id_token: token.id_token }
         })
       ]);
 
@@ -79,7 +76,7 @@ export const apiController = {
         token_type: 'Bearer',
         expires_in: 3600,
         refresh_token: newRefreshToken,
-        scope: token.scope.join(' ')
+        scope: token.scope
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -104,7 +101,7 @@ export const apiController = {
       // Find and delete the token
       await prisma.token.deleteMany({
         where: {
-          value: token,
+          token_value: token,
           ...(tokenHint ? { type: tokenHint } : {})
         }
       });
@@ -135,7 +132,7 @@ export const apiController = {
       }
 
       const user = await prisma.user.findUnique({
-        where: { id: req.user.sub }
+        where: { id_user: Number(req.user.sub) }
       });
 
       if (!user) {
@@ -143,11 +140,9 @@ export const apiController = {
       }
 
       res.json({
-        id: user.id,
+        id: user.id_user,
         email: user.email,
-        email_verified: !!user.emailVerifiedAt,
-        created_at: user.createdAt,
-        updated_at: user.updatedAt
+        email_verified: user.status === 'ACTIVE'
       });
     } catch (error) {
       res.status(500).json({
@@ -171,16 +166,14 @@ export const apiController = {
       const updates = updateSchema.parse(req.body);
 
       const user = await prisma.user.update({
-        where: { id: req.user.sub },
+        where: { id_user: Number(req.user.sub) },
         data: updates
       });
 
       res.json({
-        id: user.id,
+        id: user.id_user,
         email: user.email,
-        email_verified: !!user.emailVerifiedAt,
-        created_at: user.createdAt,
-        updated_at: user.updatedAt
+        email_verified: user.status === 'ACTIVE'
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

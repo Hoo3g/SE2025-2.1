@@ -1,4 +1,4 @@
-import { prisma } from "../prisma/client";
+import { prisma } from "../prisma/client.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
@@ -47,6 +47,21 @@ export const userService = {
 
     return { user, token };
   },
+
+  async signIn(email: string, password: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error("Invalid credentials");
+
+    if (user.status !== "ACTIVE") {
+      throw new Error("Email not verified");
+    }
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) throw new Error("Invalid credentials");
+
+    return user;
+  },
+
 
   async verifyEmail(token: string) {
     const record = await prisma.verifyEmail.findFirst({

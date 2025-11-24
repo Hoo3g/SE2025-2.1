@@ -21,15 +21,13 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Mount OIDC routes before other routes
-app.use('/', provider.callback());
-
-// Custom routes after OIDC routes
+// Custom routes and static files
 app.use('/auth', authRouter);
 app.use('/api', apiRouter);
-
-// Static files
 app.use(express.static('public'));
+
+// Mount OIDC provider as a fallback so custom routes take precedence
+app.use('/', provider.callback());
 
 // Launch app
 const PORT = process.env.PORT || 3000;

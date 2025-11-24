@@ -1,17 +1,9 @@
-import { Router } from 'express';
-import { authController } from '../controllers/authController.js';
-import { verifyToken } from '../middleware/verifyToken.js';
+import { Router } from "express";
+import { authController } from "../controllers/authController";
 
-export const router = Router();
+const router = Router();
 
-// Authentication endpoints
-router.post('/signup', authController.signup);
-router.post('/login', authController.login);
-router.post('/logout', verifyToken, authController.logout);
-router.post('/change-password', verifyToken, authController.changePassword);
+router.post("/signup", authController.signup);
+router.get("/verify-email", authController.verifyEmail);
 
-// OIDC endpoints
-router.get('/.well-known/openid-configuration', authController.discovery);
-router.get('/authorize', authController.authorize);
-router.post('/token', authController.token);
-router.get('/userinfo', verifyToken, authController.userinfo);
+export default router;

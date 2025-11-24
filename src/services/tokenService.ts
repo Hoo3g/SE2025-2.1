@@ -1,11 +1,21 @@
 import { SignJWT } from "jose";
-import { createPrivateKey } from "crypto";
+import { createPrivateKey, generateKeyPairSync } from "crypto";
 
-const privateKeyPem = `
+let privateKeyPem = `
 -----BEGIN PRIVATE KEY-----
 ...your private key here...
 -----END PRIVATE KEY-----
 `;
+
+// If no real key is provided (placeholder present), generate a temporary RSA keypair for dev
+if (privateKeyPem.includes("...your private key here...")) {
+  const { privateKey: genPriv } = generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: "spki", format: "pem" },
+    privateKeyEncoding: { type: "pkcs8", format: "pem" },
+  });
+  privateKeyPem = genPriv;
+}
 
 const privateKey = createPrivateKey(privateKeyPem);
 

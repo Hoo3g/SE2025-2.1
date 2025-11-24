@@ -33,7 +33,8 @@ class CustomAccount {
   }
 
   static async findAccount(ctx: KoaContextWithOIDC, id: string) {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const userId = Number(id);
+    const user = await prisma.user.findUnique({ where: { id_user: userId } });
     if (!user) return undefined;
     return new CustomAccount(id, user);
   }

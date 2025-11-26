@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign In</title>
+  </head>
+  <body>
+    <h1>Sign In</h1>
+    <form method="POST" action="/auth/signin">
+      <label>Email: <input name="email" type="email" required /></label>
+      <br />
+      <label>Password: <input name="password" type="password" required /></label>
+      <br />
+      <!-- The server expects a redirect_url; default to the current host's /dashboard -->
+      <input type="hidden" name="redirect_url" value="" id="redirectUrl" />
+      <button type="submit">Sign In</button>
+    </form>
+
+    <script>
+      // Fill redirect URL for the signin form
+      (function() {
+        const redirectInput = document.getElementById('redirectUrl');
+        const redirect = new URL(window.location.href);
+        // If a redirect_url query param is present from the server, use it; else support older 'redirect' param and default to /dashboard
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirectFromQuery = searchParams.get('redirect_url') || searchParams.get('redirect');
+        redirectInput.value = redirectFromQuery || (location.origin + '/dashboard');
+      })();
+    </script>
+  </body>
+  </html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <h1>Dashboard</h1>
+    <div id="status">Loading...</div>
+    <button id="logoutBtn">Log out</button>
+
+    <script>
+      function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+      }
+      function getCookie(name) {
+        return document.cookie.split('; ').reduce((r, v) => {
+          const parts = v.split('=');
+          return parts[0] === name ? decodeURIComponent(parts[1]) : r
+        }, '');
+      }
+
+      (function() {
+        const tokenFromQuery = new URLSearchParams(window.location.search).get('token');
+        if (tokenFromQuery) {
+          // Store token in cookie and remove query param from URL
+          setCookie('token', tokenFromQuery, 1);
+          const cleanUrl = window.location.origin + window.location.pathname;
+          history.replaceState({}, '', cleanUrl);
+        }
+
+        const token = getCookie('token');
+        if (!token) {
+          // Redirect to login page and let the server ask for a redirect_url param
+          window.location.href = '/auth/login?redirect_url=' + encodeURIComponent(window.location.href);
+          return;
+        }
+
+        // We have a token, show a simple authenticated UI
+        document.getElementById('status').textContent = 'You are logged in!';
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+          // Delete cookie and go to logout route
+          setCookie('token', '', -1);
+          window.location.href = '/auth/login?redirect=' + encodeURIComponent(window.location.origin + '/dashboard');
+        });
+      })();
+    </script>
+  </body>
+  </html>

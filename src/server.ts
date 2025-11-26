@@ -6,6 +6,8 @@ import authRouter from './routes/auth.js';
 import apiRouter from './routes/api.js';
 import { oidcConfig } from './config/oidc.js';
 import { BASE_URL } from './config.js';
+import ensureAuthenticated from './middleware/ensureAuthenticated.js';
+import path from 'path';
 
 const app = express();
 
@@ -25,6 +27,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/auth', authRouter);
 app.use('/api', apiRouter);
 app.use(express.static('public'));
+
+// Root redirect to dashboard and protect dashboard route
+app.get('/', (req, res) => res.redirect('/dashboard'));
+app.get('/dashboard', ensureAuthenticated, (req, res) => {
+  return res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
+});
 
 // Mount OIDC provider as a fallback so custom routes take precedence
 app.use('/', provider.callback());

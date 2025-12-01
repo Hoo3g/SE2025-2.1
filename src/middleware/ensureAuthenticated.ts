@@ -23,8 +23,12 @@ export async function ensureAuthenticated(
       `${req.protocol}://${req.get('host')}${req.originalUrl}`
     );
 
-    // https://id.asset3d.io/login
-    const idpLogin = (IDP_ISSUER || BASE_URL) + '/login';
+    // Redirect to the app login page by default (/auth/login). If an external IDP issuer
+    // is configured and it differs from our BASE_URL, redirect to the external IDP's
+    // /login endpoint instead.
+    // Only treat IDP_ISSUER as an external provider if it was explicitly set via env var.
+    const externalIssuerProvided = !!process.env.IDP_ISSUER;
+    const idpLogin = externalIssuerProvided ? (IDP_ISSUER + '/login') : (BASE_URL + '/auth/login');
 
     return res.redirect(`${idpLogin}?redirect_url=${currentUrl}`);
   }

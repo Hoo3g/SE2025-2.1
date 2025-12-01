@@ -40,6 +40,13 @@
 
         // We have a token, show a simple authenticated UI
         document.getElementById('status').textContent = 'You are logged in!';
+        // Link to edit profile
+        const editLink = document.createElement('a');
+        editLink.href = '/profile/edit';
+        editLink.textContent = 'Edit profile';
+        editLink.style.marginLeft = '12px';
+        document.body.insertBefore(editLink, document.getElementById('logoutBtn'));
+
         document.getElementById('logoutBtn').addEventListener('click', function() {
           // Delete cookie and go to logout route
           setCookie('token', '', -1);

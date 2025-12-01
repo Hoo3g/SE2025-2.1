@@ -34,6 +34,11 @@ app.get('/dashboard', ensureAuthenticated, (req, res) => {
   return res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
 });
 
+// Edit profile page
+app.get('/profile/edit', ensureAuthenticated, (req, res) => {
+  return res.sendFile(path.join(process.cwd(), 'public', 'edit-profile.html'));
+});
+
 // Mount OIDC provider as a fallback so custom routes take precedence
 app.use('/', provider.callback());
 

@@ -142,7 +142,12 @@ export const apiController = {
       res.json({
         id: user.id_user,
         email: user.email,
-        email_verified: user.status === 'ACTIVE'
+        email_verified: user.status === 'ACTIVE',
+        firstName: user.first_name,
+        lastName: user.last_name,
+        phoneNumber: user.phone_number,
+        avatar: user.avatar,
+        dateOfBirth: user.date_of_birth ? user.date_of_birth.toISOString() : null
       });
     } catch (error) {
       res.status(500).json({
@@ -158,12 +163,36 @@ export const apiController = {
         return res.status(401).json({ error: 'Unauthorized' });
       }
 
+      // Accept multipart/form-data (multer) or JSON body.
       const updateSchema = z.object({
         email: z.string().email().optional(),
-        // Add other updatable fields here
+        firstName: z.string().min(1).optional(),
+        lastName: z.string().min(1).optional(),
+        phoneNumber: z.string().min(1).optional(),
+        dateOfBirth: z.string().optional(), // will validate below
       });
 
-      const updates = updateSchema.parse(req.body);
+      // multer places fields in req.body as strings even for multipart
+      const rawUpdates = req.body || {};
+      const parsed = updateSchema.parse(rawUpdates);
+
+      const updates: any = {};
+      if (parsed.email) updates.email = parsed.email;
+      if (parsed.firstName) updates.first_name = parsed.firstName;
+      if (parsed.lastName) updates.last_name = parsed.lastName;
+      if (parsed.phoneNumber) updates.phone_number = parsed.phoneNumber;
+      if (parsed.dateOfBirth) {
+        const d = new Date(parsed.dateOfBirth);
+        if (isNaN(d.getTime())) {
+          return res.status(400).json({ error: 'invalid_request', error_description: 'Invalid dateOfBirth' });
+        }
+        updates.date_of_birth = d;
+      }
+
+      // If a new avatar file was uploaded via multer, set the avatar path
+      if ((req as any).file && (req as any).file.filename) {
+        updates.avatar = `/uploads/${(req as any).file.filename}`;
+      }
 
       const user = await prisma.user.update({
         where: { id_user: Number(req.user.sub) },
@@ -173,7 +202,12 @@ export const apiController = {
       res.json({
         id: user.id_user,
         email: user.email,
-        email_verified: user.status === 'ACTIVE'
+        email_verified: user.status === 'ACTIVE',
+        firstName: user.first_name,
+        lastName: user.last_name,
+        phoneNumber: user.phone_number,
+        avatar: user.avatar,
+        dateOfBirth: user.date_of_birth ? user.date_of_birth.toISOString() : null
       });
     } catch (error) {
       if (error instanceof z.ZodError) {

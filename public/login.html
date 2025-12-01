@@ -4,29 +4,102 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sign In</title>
+    <style>
+      :root { --bg: #fafafa; --card: #fff; --accent: #111; --muted:#666; }
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: #111; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+      .card { width:420px; background:var(--card); box-shadow:0 8px 30px rgba(16,24,40,0.08); border-radius:12px; padding:24px; }
+      h1 { font-size:20px; margin:0 0 12px 0; }
+      form { display:flex; flex-direction:column; gap:12px; }
+      label { font-size:14px; display:flex; flex-direction:column; gap:6px; }
+      input[type="email"], input[type="password"], input[type="text"] { padding:10px; border-radius:8px; border:1px solid #ddd; font-size:14px; }
+      button { padding:10px 12px; border-radius:8px; border:0; background:var(--accent); color:white; font-weight:600; cursor:pointer; }
+      .muted { color:var(--muted); font-size:13px; text-align:center; margin-top:6px; }
+      .footer { text-align:center; margin-top:8px; font-size:13px; }
+    </style>
   </head>
   <body>
-    <h1>Sign In</h1>
-    <form method="POST" action="/auth/signin">
-      <label>Email: <input name="email" type="email" required /></label>
-      <br />
-      <label>Password: <input name="password" type="password" required /></label>
-      <br />
-      <!-- The server expects a redirect_url; default to the current host's /dashboard -->
-      <input type="hidden" name="redirect_url" value="" id="redirectUrl" />
-      <button type="submit">Sign In</button>
-    </form>
+    <div class="card">
+      <h1>Sign In</h1>
+      <form method="POST" action="/auth/signin" id="signinForm">
+        <div id="pageError" style="color:#b91c1c;margin-bottom:10px;display:none"></div>
+        <label>
+          Email
+          <input id="emailInput" name="email" type="email" required />
+        </label>
+        <label>
+          Password
+          <input name="password" type="password" required />
+        </label>
+        <input type="hidden" name="redirect_url" value="" id="redirectUrl" />
+        <button type="submit">Sign In</button>
+      </form>
+
+      <div class="muted">Don't have an account? <a href="/auth/signup">Sign up</a></div>
+    </div>
 
     <script>
-      // Fill redirect URL for the signin form
+        // Fill redirect URL for the sign-in form and show any error or pre-filled email
       (function() {
         const redirectInput = document.getElementById('redirectUrl');
-        const redirect = new URL(window.location.href);
-        // If a redirect_url query param is present from the server, use it; else support older 'redirect' param and default to /dashboard
         const searchParams = new URLSearchParams(window.location.search);
+          const pageError = document.getElementById('pageError');
+          const errorMsg = searchParams.get('error');
+          const emailFromQuery = searchParams.get('email');
+          if (errorMsg) {
+            pageError.style.display = 'block';
+            pageError.textContent = decodeURIComponent(errorMsg);
+          }
+          if (emailFromQuery) document.getElementById('emailInput').value = emailFromQuery;
+
+          // Intercept submit with JS so that raw JSON pages aren't shown to users.
+          const form = document.getElementById('signinForm');
+          form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            pageError.style.display = 'none';
+            pageError.textContent = '';
+
+            const fd = new URLSearchParams(new FormData(form));
+
+            try {
+              const resp = await fetch(form.action, {
+                method: form.method,
+                headers: { 'Accept': 'application/json, text/html' },
+                body: fd
+              });
+
+              // If server redirected (signin success -> redirect to dashboard with token), follow
+              if (resp.redirected && resp.url) {
+                window.location.href = resp.url;
+                return;
+              }
+
+              // If server returns JSON error, show it
+              const ct = resp.headers.get('content-type') || '';
+              if (ct.includes('application/json')) {
+                const j = await resp.json().catch(()=>null);
+                pageError.textContent = j?.error || j?.message || 'Sign in failed';
+                pageError.style.display = 'block';
+                return;
+              }
+
+              // Fallback: load returned body into page
+              const text = await resp.text().catch(()=>null);
+              if (text) {
+                pageError.textContent = text.slice(0, 300);
+                pageError.style.display = 'block';
+              }
+            } catch (err) {
+              pageError.style.display = 'block';
+              pageError.textContent = 'Sign in failed — network error';
+            }
+          });
         const redirectFromQuery = searchParams.get('redirect_url') || searchParams.get('redirect');
         redirectInput.value = redirectFromQuery || (location.origin + '/dashboard');
+
+        // If the browser has an email stored (autofill), keep it. Otherwise focus the email input
+        const emailInput = document.getElementById('emailInput');
+        if (window.location.search.indexOf('email=') === -1) setTimeout(() => emailInput.focus(), 200);
       })();
     </script>
   </body>
-  </html>
+</html>

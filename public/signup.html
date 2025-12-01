@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign Up</title>
+    <style>
+      :root { --bg: #fafafa; --card: #fff; --accent: #111; --muted:#666; }
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: #111; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+      .card { width:520px; background:var(--card); box-shadow:0 8px 30px rgba(16,24,40,0.08); border-radius:12px; padding:24px; }
+      h1 { font-size:20px; margin:0 0 12px 0; }
+      form { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      label { font-size:14px; display:flex; flex-direction:column; gap:6px; }
+      .full { grid-column: 1 / -1; }
+      input, button { padding:10px; border-radius:8px; border:1px solid #ddd; font-size:14px; }
+      button { border:0; background:var(--accent); color:white; font-weight:600; cursor:pointer; }
+      .muted { color:var(--muted); font-size:13px; text-align:center; margin-top:6px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Create account</h1>
+      <form method="POST" enctype="multipart/form-data" action="/auth/signup">
+        <label>
+          First name
+          <input name="firstName" type="text" required />
+        </label>
+        <label>
+          Last name
+          <input name="lastName" type="text" required />
+        </label>
+        <label class="full">
+          Date of birth
+          <input name="dateOfBirth" type="date" required />
+        </label>
+        <label class="full">
+          Phone
+          <input name="phoneNumber" type="tel" required />
+        </label>
+        <label class="full">
+          Email
+          <input name="email" type="email" required />
+        </label>
+        <label class="full">
+          Password
+          <input name="password" type="password" minlength="8" required />
+        </label>
+        <label class="full">
+          Avatar
+          <input name="avatar" type="file" accept="image/*" />
+        </label>
+        <div class="full"><button type="submit">Sign Up</button></div>
+      </form>
+      <div class="muted">Already have an account? <a href="/auth/login">Sign in</a></div>
+    </div>
+  </body>
+</html>

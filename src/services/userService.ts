@@ -8,12 +8,16 @@ export const userService = {
     lastName,
     email,
     phoneNumber,
+    dateOfBirth,
+    avatar,
     password,
   }: {
     firstName?: string;
     lastName?: string;
     email: string;
     phoneNumber?: string;
+    dateOfBirth?: string;
+    avatar?: string;
     password: string;
   }) {
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -27,6 +31,8 @@ export const userService = {
         last_name: lastName || "",
         email,
         phone_number: phoneNumber || "",
+        date_of_birth: dateOfBirth ? new Date(dateOfBirth) : null,
+        avatar: avatar || null,
         password: passwordHash,
         role: "USER",
         status: "NOT_ACTIVE",

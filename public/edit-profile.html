@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Edit Profile</title>
+  </head>
+  <body>
+    <h1>Edit Profile</h1>
+    <div id="status">Loading...</div>
+
+    <form id="profileForm">
+      <div>
+        <label for="firstName">First name</label>
+        <input id="firstName" name="firstName" type="text" />
+      </div>
+      <div>
+        <label for="lastName">Last name</label>
+        <input id="lastName" name="lastName" type="text" />
+      </div>
+      <div>
+        <label for="email">Email (readonly)</label>
+        <input id="email" name="email" type="email" readonly />
+      </div>
+      <div>
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="text" />
+      </div>
+      <div>
+        <label for="dob">Date of birth</label>
+        <input id="dob" name="dateOfBirth" type="date" />
+      </div>
+      <div>
+        <label for="avatar">Avatar</label>
+        <input id="avatar" name="avatar" type="file" accept="image/*" />
+        <div id="avatarPreview"></div>
+      </div>
+
+      <button type="submit">Save</button>
+      <a href="/dashboard">Cancel</a>
+    </form>
+
+    <script>
+      function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+      }
+      function getCookie(name) {
+        return document.cookie.split('; ').reduce((r, v) => {
+          const parts = v.split('=');
+          return parts[0] === name ? decodeURIComponent(parts[1]) : r
+        }, '');
+      }
+
+      (async function() {
+        const tokenFromQuery = new URLSearchParams(window.location.search).get('token');
+        if (tokenFromQuery) {
+          setCookie('token', tokenFromQuery, 1);
+          const cleanUrl = window.location.origin + window.location.pathname;
+          history.replaceState({}, '', cleanUrl);
+        }
+
+        const token = getCookie('token');
+        if (!token) {
+          window.location.href = '/auth/login?redirect_url=' + encodeURIComponent(window.location.href);
+          return;
+        }
+
+        const statusEl = document.getElementById('status');
+        try {
+          const resp = await fetch('/api/profile', { credentials: 'same-origin' });
+          if (!resp.ok) {
+            if (resp.status === 401) window.location.href = '/auth/login?redirect_url=' + encodeURIComponent(window.location.href);
+            throw new Error('Failed to fetch profile');
+          }
+          const profile = await resp.json();
+
+          document.getElementById('firstName').value = profile.firstName || '';
+          document.getElementById('lastName').value = profile.lastName || '';
+          document.getElementById('email').value = profile.email || '';
+          document.getElementById('phone').value = profile.phoneNumber || '';
+          if (profile.dateOfBirth) {
+            // Convert to yyyy-mm-dd
+            const d = new Date(profile.dateOfBirth);
+            const iso = d.toISOString().slice(0,10);
+            document.getElementById('dob').value = iso;
+          }
+
+          if (profile.avatar) {
+            const preview = document.getElementById('avatarPreview');
+            const img = document.createElement('img');
+            img.src = profile.avatar;
+            img.style.maxWidth = '150px';
+            img.style.display = 'block';
+            preview.appendChild(img);
+          }
+
+          statusEl.textContent = '';
+
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = 'Error loading profile. You may need to sign in again.';
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function (ev) {
+          ev.preventDefault();
+          statusEl.textContent = 'Saving...';
+          const form = ev.currentTarget;
+          const fd = new FormData();
+
+          const first = document.getElementById('firstName').value;
+          const last = document.getElementById('lastName').value;
+          const phone = document.getElementById('phone').value;
+          const dob = document.getElementById('dob').value;
+          const avatarFile = document.getElementById('avatar').files[0];
+
+          if (first) fd.append('firstName', first);
+          if (last) fd.append('lastName', last);
+          if (phone) fd.append('phoneNumber', phone);
+          if (dob) fd.append('dateOfBirth', dob);
+          if (avatarFile) fd.append('avatar', avatarFile);
+
+          try {
+            const r = await fetch('/api/profile', {
+              method: 'PUT',
+              credentials: 'same-origin',
+              body: fd
+            });
+
+            if (!r.ok) {
+              const body = await r.json().catch(()=>({}));
+              throw new Error(body?.error_description || 'Failed to update');
+            }
+
+            statusEl.textContent = 'Saved successfully.';
+            setTimeout(()=> window.location.href = '/dashboard', 900);
+          } catch (e) {
+            console.error(e);
+            statusEl.textContent = 'Failed to save: ' + e.message;
+          }
+        });
+
+      })();
+    </script>
+  </body>
+</html>

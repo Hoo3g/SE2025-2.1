@@ -7,15 +7,13 @@ import { issueToken } from "../services/tokenService.js";
 export const authController = {
   async signup(req: Request, res: Response) {
     try {
-      const {  email, password } = req.body;
+      const {  email, password,first_name,last_name,phone_number } = req.body;
 
-      if (!email || !password) {
+      if (!email || !password || !first_name || !last_name || !phone_number) {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
-      
-
-      // Kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ và số
+    // Kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ và số
       const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
       if (!passwordRegex.test(password)) {
         return res.status(400).json({
@@ -33,6 +31,9 @@ export const authController = {
       const { user, token } = await userService.createUser({
         email,
         password,
+        firstName: first_name,
+        lastName:last_name,
+        phoneNumber:phone_number
       });
 
       await sendVerifyEmail(user.email, token);

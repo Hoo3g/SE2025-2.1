@@ -1,15 +1,15 @@
 import { Router } from "express";
-import path from 'path';
 import { authController } from "../controllers/authController.js";
+import { oidcController } from "../controllers/oidcController.js";
 
 const router = Router();
 
-router.get('/login', (req, res) => {
-	// Serve a simple login page stored under public/login.html
-	return res.sendFile(path.join(process.cwd(), 'public', 'login.html'));
-});
+// Interaction routes cho OIDC
+router.get("/interaction/:uid", oidcController.showInteraction);
+router.post("/interaction/:uid/login", oidcController.submitLogin);
+router.post("/interaction/:uid/consent", oidcController.submitConsent);
 
-router.post("/signin", authController.signin);
+// Signup & verify email (ngoài OIDC)
 router.post("/signup", authController.signup);
 router.get("/verify-email", authController.verifyEmail);
 

@@ -48,8 +48,7 @@ export async function createProvider(issuer: string) {
 
   const provider = new Provider(issuer, configuration);
 
-  // Thêm các grant types và response types
-  provider.registerGrantType('refresh_token', require('oidc-provider/lib/actions/grants/refresh_token'));
+  
 
   return provider;
 }

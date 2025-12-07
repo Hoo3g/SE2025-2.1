@@ -12,5 +12,10 @@ router.post("/interaction/:uid/consent", oidcController.submitConsent);
 // Signup & verify email (ngoài OIDC)
 router.post("/signup", authController.signup);
 router.get("/verify-email", authController.verifyEmail);
+// routes/auth.js
+router.post("/signup", (req, res) => {
+  console.log(">>> Signup route hit với body:", req.body);
+  res.send("Signup OK");
+});
 
 export default router;

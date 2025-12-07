@@ -1,13 +1,8 @@
-
 import { Router } from "express";
 import authRoutes from "./auth.js";
 
-export const router = Router();
+const router = Router();
 
-// Token management
-router.post('/token/refresh', apiController.refreshToken);
-router.post('/token/revoke', verifyToken, apiController.revokeToken);
+router.use("/auth", authRoutes);
 
-// Protected resources
-router.get('/me', verifyToken, apiController.getProfile);
-router.patch('/me', verifyToken, apiController.updateProfile);
+export default router;

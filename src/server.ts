@@ -27,12 +27,6 @@ app.use('/auth', authRouter);
 app.use('/api', apiRouter);
 app.use(express.static('public'));
 
-// Root redirect to dashboard and protect dashboard route
-// Root redirect to dashboard
-app.get('/', (req, res) => res.redirect('/dashboard'));
-app.get('/dashboard', (req, res) => {
-  return res.sendFile(path.join(process.cwd(), 'public', 'dashboard.html'));
-});
 
 
 // Mount OIDC provider as a fallback so custom routes take precedence

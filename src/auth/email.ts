@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 
 export async function sendVerifyEmail(email: string, token: string) {
-  const verifyUrl = `${process.env.APP_URL}/verify-email?token=${token}`;
+  const verifyUrl = `${process.env.APP_URL}/auth/verify-email?token=${token}`;
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -14,12 +14,12 @@ export async function sendVerifyEmail(email: string, token: string) {
   });
 
   await transporter.sendMail({
-    from: '"Asset3D ID" <no-reply@asset3d.io>',
+    from: '"MyApp" <letuanhiep030204@gmail.com>',
     to: email,
-    subject: "Verify your Asset3D account",
+    subject: "Verify your account",
     html: `
-      <h3>Welcome to Asset3D!</h3>
-      <p>Click below to verify your email:</p>
+      <h3>Welcome to MyApp!</h3>
+      <p>Thank you for signing up. Please click the link below to verify your email:</p>
       <a href="${verifyUrl}">${verifyUrl}</a>
       <p>This link expires in 1 hour.</p>
     `,

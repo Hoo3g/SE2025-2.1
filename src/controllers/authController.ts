@@ -69,7 +69,7 @@ export const authController = {
   // Authentication endpoints
   signup: async (req: Request, res: Response) => {
     try {
-<<<<<<< HEAD
+
       const {  email, password,first_name,last_name,phone_number } = req.body;
 
       if (!email || !password || !first_name || !last_name || !phone_number) {
@@ -97,22 +97,6 @@ export const authController = {
         firstName: first_name,
         lastName:last_name,
         phoneNumber:phone_number
-=======
-      const { email, password } = signupSchema.parse(req.body);
-      
-      const existingUser = await prisma.user.findUnique({ where: { email } });
-      if (existingUser) {
-        return res.status(400).json({ error: 'Email đã được sử dụng' });
-      }
-
-      const passwordHash = await bcrypt.hash(password, 10);
-      const user = await prisma.user.create({
-        data: { 
-          email, 
-          passwordHash,
-          subject: `user-${Date.now()}` // Generate OIDC subject
-        }
->>>>>>> 650ab232d071d9d5532ca8e4241fcd4b6ac2616f
       });
 
       res.status(201).json({
@@ -128,7 +112,7 @@ export const authController = {
     }
   },
 
-<<<<<<< HEAD
+
   async signin(req: Request, res: Response) {
     try {
       const { email, password, redirect_url } = req.body;
@@ -154,9 +138,7 @@ export const authController = {
   },
 
   async verifyEmail(req: Request, res: Response) {
-=======
-  login: async (req: Request, res: Response) => {
->>>>>>> 650ab232d071d9d5532ca8e4241fcd4b6ac2616f
+
     try {
       const { email, password } = loginSchema.parse(req.body);
       

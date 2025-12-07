@@ -1,4 +1,5 @@
-import nodemailer from "nodemailer";
+import nodemailer from 'nodemailer';
+import { EMAIL_FROM } from '../config.js';
 
 export async function sendVerifyEmail(email: string, token: string) {
   const verifyUrl = `${process.env.APP_URL}/auth/verify-email?token=${token}`;
@@ -24,4 +25,5 @@ export async function sendVerifyEmail(email: string, token: string) {
       <p>This link expires in 1 hour.</p>
     `,
   });
+
 }

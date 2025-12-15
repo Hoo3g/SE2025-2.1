@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bảo Mật & Đăng Nhập</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+        color: #e2e8f0;
+      }
+
+      .layout {
+        min-height: 100vh;
+        display: flex;
+      }
+
+      .sidebar {
+        width: 280px;
+        background: rgba(30, 41, 59, 0.9);
+        border-right: 1px solid rgba(148, 163, 184, 0.08);
+        display: flex;
+        flex-direction: column;
+        padding: 2rem 0;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+      }
+
+      .sidebar-title {
+        padding: 0 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .sidebar-nav {
+        list-style: none;
+        flex: 1;
+      }
+
+      .sidebar-nav li {
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-nav a {
+        display: block;
+        padding: 0.75rem 1.5rem;
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+      }
+
+      .sidebar-nav a:hover,
+      .sidebar-nav a.active {
+        background: rgba(14, 165, 233, 0.12);
+        color: #e2e8f0;
+        border-left-color: #0ea5e9;
+      }
+
+      .sidebar-footer {
+        padding: 1.5rem;
+      }
+
+      .logout-btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+      }
+
+      .logout-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 2.5rem;
+        margin-left: 280px;
+      }
+
+      .settings-header {
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .settings-meta h1 {
+        font-size: 1.9rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+      }
+
+      .settings-meta p {
+        color: #94a3b8;
+      }
+
+      .settings-section {
+        background: rgba(30, 41, 59, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 16px;
+        padding: 2.2rem;
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+      }
+
+      .section-description {
+        color: #94a3b8;
+        font-size: 0.92rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.25rem;
+      }
+
+      label {
+        font-size: 0.9rem;
+        color: #cbd5e1;
+        display: block;
+        margin-bottom: 0.4rem;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(51, 65, 85, 0.45);
+        color: #e2e8f0;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        background: rgba(51, 65, 85, 0.7);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+      }
+
+      .btn-primary {
+        padding: 0.85rem 1.6rem;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+      }
+
+      .status-message {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        display: none;
+      }
+
+      .status-message.show {
+        display: block;
+      }
+
+      .status-success {
+        color: #4ade80;
+      }
+
+      .status-error {
+        color: #f87171;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .device-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        background: rgba(51, 65, 85, 0.4);
+        margin-bottom: 1rem;
+      }
+
+      .device-info {
+        flex: 1;
+        margin-right: 1rem;
+      }
+
+      .device-name {
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+      }
+
+      .device-details {
+        color: #94a3b8;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 768px) {
+        .layout {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          border-right: none;
+          border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-title">
+          <h2>Cài Đặt Tài Khoản</h2>
+        </div>
+        <nav class="sidebar-nav">
+          <li><a href="/account-profile.html">Thông Tin Cá Nhân</a></li>
+          <li><a href="/account-security.html" class="active">Bảo Mật & Đăng Nhập</a></li>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="logout-btn" id="logoutBtn">Đăng Xuất</button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <div class="settings-header">
+          <div class="settings-meta">
+            <h1>Bảo Mật & Đăng Nhập</h1>
+            <p>Quản lý mật khẩu, xác thực và thiết bị đã đăng nhập vào tài khoản của bạn</p>
+          </div>
+          <div class="header-actions">
+            <button class="logout-btn" id="logoutBtnTop">Đăng Xuất</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2 class="section-title">Đổi mật khẩu</h2>
+          <p class="section-description">Đảm bảo mật khẩu có tối thiểu 8 ký tự, bao gồm chữ và số.</p>
+
+          <form id="passwordForm">
+            <div class="form-group">
+              <label for="currentPassword">Mật khẩu hiện tại</label>
+              <input type="password" id="currentPassword" placeholder="Nhập mật khẩu hiện tại" />
+            </div>
+            <div class="form-group">
+              <label for="newPassword">Mật khẩu mới</label>
+              <input type="password" id="newPassword" placeholder="Ít nhất 8 ký tự" />
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Xác nhận mật khẩu mới</label>
+              <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu mới" />
+            </div>
+            <button type="submit" class="btn-primary">Cập nhật mật khẩu</button>
+            <div class="status-message status-error" id="passwordError"></div>
+            <div class="status-message status-success" id="passwordSuccess"></div>
+          </form>
+        </div>
+
+        <div class="settings-section">
+          <h2 class="section-title">Xác thực tài khoản</h2>
+          <p class="section-description">Kích hoạt xác thực email/SMS để bảo vệ tài khoản tốt hơn.</p>
+
+          <div class="device-item">
+            <div class="device-info">
+              <div class="device-name">Xác thực email</div>
+              <div class="device-details">Xác thực địa chỉ email để kích hoạt đầy đủ tính năng.</div>
+            </div>
+            <button type="button" class="btn-primary" id="verifyEmailBtn">Gửi lại liên kết</button>
+          </div>
+
+          <div class="device-item">
+            <div class="device-info">
+              <div class="device-name">Xác thực số điện thoại</div>
+              <div class="device-details">Sử dụng mã OTP để đảm bảo chỉ bạn mới có thể đăng nhập.</div>
+            </div>
+            <button type="button" class="btn-primary" id="verifyPhoneBtn">Bắt đầu</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2 class="section-title">Thiết bị đã đăng nhập</h2>
+          <p class="section-description">Theo dõi và đăng xuất khỏi các phiên hoạt động không mong muốn.</p>
+          <div id="devicesList"></div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const tokenFromQuery = params.get('token');
+      if (tokenFromQuery) {
+        setCookie('token', tokenFromQuery, 1);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+
+      function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+      }
+
+      function getCookie(name) {
+        return document.cookie.split('; ').reduce((r, v) => {
+          const parts = v.split('=');
+          return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+        }, '');
+      }
+
+      const token = getCookie('token');
+      if (!token) {
+        window.location.href = '/login.html?redirect_url=' + encodeURIComponent(window.location.href);
+      }
+
+      function handleLogout() {
+        setCookie('token', '', -1);
+        window.location.href = '/login.html';
+      }
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      const topButton = document.getElementById('logoutBtnTop');
+      if (topButton) topButton.addEventListener('click', handleLogout);
+
+      document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.status-message').forEach(el => el.classList.remove('show'));
+
+        const current = document.getElementById('currentPassword').value;
+        const next = document.getElementById('newPassword').value;
+        const confirm = document.getElementById('confirmPassword').value;
+
+        if (next !== confirm) {
+          const err = document.getElementById('passwordError');
+          err.textContent = 'Mật khẩu mới không khớp';
+          err.classList.add('show');
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/user/password', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + token,
+            },
+            body: JSON.stringify({
+              current_password: current,
+              new_password: next,
+            }),
+          });
+
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || 'Không thể cập nhật mật khẩu');
+          }
+          document.getElementById('passwordSuccess').textContent = 'Đổi mật khẩu thành công!';
+          document.getElementById('passwordSuccess').classList.add('show');
+          e.target.reset();
+        } catch (err) {
+          const msg = document.getElementById('passwordError');
+          msg.textContent = err.message;
+          msg.classList.add('show');
+        }
+      });
+
+      // Mock device list placeholder
+      const devicesList = document.getElementById('devicesList');
+      devicesList.innerHTML = `
+        <div class="device-item">
+          <div class="device-info">
+            <div class="device-name">Chrome trên Windows 11</div>
+            <div class="device-details">Đăng nhập lúc ${new Date().toLocaleString('vi-VN')}</div>
+          </div>
+          <button class="btn-primary" style="padding:0.5rem 1rem;">Đăng xuất</button>
+        </div>
+      `;
+    </script>
+  </body>
+</html>

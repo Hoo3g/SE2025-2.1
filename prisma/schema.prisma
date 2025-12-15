@@ -6,25 +6,116 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+// Adjusted to match the SQL migration and application code
 
-model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  passwordHash    String
-  emailVerifiedAt DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  emailTokens EmailToken[] @relation("UserEmailTokens")
+enum Role {
+  ADMIN
+  USER
 }
 
-model EmailToken {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
-  purpose   String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+enum Status {
+  ACTIVE
+  NOT_ACTIVE
+}
 
-  user User @relation("UserEmailTokens", fields: [userId], references: [id], onDelete: Cascade)
+model User {
+  id_user     Int       @id @default(autoincrement())
+  last_name   String
+  first_name  String
+  email       String    @unique
+  phone_number String
+  date_of_birth DateTime?
+  role        Role
+  avatar      String?
+  status      Status
+  password    String
+
+  // relations
+  change_password ChangePassword[]
+  verify_emails   VerifyEmail[]
+  clients         Client[]
+  tokens          Token[]
+  logs            Log[]
+
+  @@map("users")
+}
+
+model ChangePassword {
+  id_change_password Int     @id @default(autoincrement())
+  id_user            Int
+  reset_password_token String
+  token_lifetime     DateTime
+
+  user User @relation(fields: [id_user], references: [id_user], onDelete: NoAction)
+
+  @@map("change_password")
+}
+
+model VerifyEmail {
+  id_verification_email Int    @id @default(autoincrement())
+  id_user               Int    @unique
+  verified_email        Boolean
+  token_email           String
+  token_lifetime        DateTime
+
+  user User @relation(fields: [id_user], references: [id_user], onDelete: NoAction)
+
+  @@map("verify_emails")
+}
+
+model Client {
+  id_client      Int     @id @default(autoincrement())
+  client_id      String  @unique
+  client_secret  String
+  redirect_uris  String
+  grant_types    String
+  response_types String
+  scope          String
+  token_endpoint String
+  id_user        Int?
+  created_at     DateTime @default(now())
+  updated_at     DateTime
+
+  user User? @relation(fields: [id_user], references: [id_user], onDelete: SetNull)
+  tokens Token[]
+  logs   Log[]
+
+  @@map("clients")
+}
+
+enum TokenType {
+  access_token
+  refresh_token
+  authorization_code
+  id_token
+}
+
+model Token {
+  id_token   Int     @id @default(autoincrement())
+  type       TokenType
+  user_id    Int
+  client_id  Int
+  scope      String
+  expires_at DateTime
+  is_revoked Boolean @default(false)
+  created_at DateTime @default(now())
+  token_value String
+
+  user User @relation(fields: [user_id], references: [id_user], onDelete: NoAction)
+  client Client @relation(fields: [client_id], references: [id_client], onDelete: NoAction)
+
+  @@map("tokens")
+}
+
+model Log {
+  id_log   Int     @id @default(autoincrement())
+  user_id  Int
+  client_id Int
+  action   String
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id_user], onDelete: NoAction)
+  client Client @relation(fields: [client_id], references: [id_client], onDelete: NoAction)
+
+  @@map("logs")
 }

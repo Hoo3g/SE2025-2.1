@@ -1,5 +1,6 @@
 
 import { Router } from "express";
+import path from 'path';
 import { authController } from "../controllers/authController.js";
 import { oidcController } from "../controllers/oidcController.js";
 
@@ -13,12 +14,12 @@ router.post("/interaction/:uid/consent", oidcController.submitConsent);
 
 // Signup & verify email (ngoài OIDC)
 router.post("/signup", authController.signup);
+router.post("/signin", authController.signin);
 router.get("/verify-email", authController.verifyEmail);
-// routes/auth.js
-router.post("/signup", (req, res) => {
-  console.log(">>> Signup route hit với body:", req.body);
-  res.send("Signup OK");
+// Serve custom login page so OIDC interactions can use our UI instead of the provider dev page
+router.get('/login', (req, res) => {
+  const loginPath = path.resolve(process.cwd(), 'public', 'login.html');
+  res.sendFile(loginPath);
 });
-
 
 export default router

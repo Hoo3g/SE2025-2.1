@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Xác thực email</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      .card {
+        width: 100%;
+        max-width: 520px;
+        background: rgba(15, 23, 42, 0.85);
+        border-radius: 18px;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: 2rem;
+        text-align: center;
+      }
+      p {
+        margin: 0 0 1.5rem;
+        text-align: center;
+        color: #cbd5f5;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.4rem;
+        color: #cbd5f5;
+        font-weight: 500;
+      }
+      input {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(30, 41, 59, 0.7);
+        color: #f8fafc;
+        font-size: 0.95rem;
+      }
+      input:focus {
+        outline: none;
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      }
+      button {
+        width: 100%;
+        padding: 0.85rem;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+        color: #fff;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.35);
+      }
+      .status {
+        margin-top: 1.5rem;
+        padding: 0.9rem 1rem;
+        border-radius: 10px;
+        display: none;
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+      .status.show {
+        display: block;
+      }
+      .status.success {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.35);
+        color: #bbf7d0;
+      }
+      .status.error {
+        background: rgba(248, 113, 113, 0.15);
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        color: #fecaca;
+      }
+      .hint {
+        margin-top: 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #94a3b8;
+      }
+      .hint a {
+        color: #38bdf8;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Xác thực email</h1>
+      <p>Sao chép token từ email (hoặc log) và dán vào ô bên dưới để kích hoạt tài khoản.</p>
+      <form id="verifyForm">
+        <div class="form-group">
+          <label for="token">token</label>
+          <input type="text" id="token" name="token" placeholder="xxxxxxxxxxxxxxxx" required />
+        </div>
+        <button type="submit">Xác thực</button>
+        <div id="status" class="status"></div>
+      </form>
+      <div class="hint">
+        Đã có tài khoản? <a href="/login.html">Đăng nhập</a> &middot;
+        Chưa đăng ký? <a href="/signup.html">Tạo tài khoản</a>
+      </div>
+    </div>
+
+    <script>
+      const tokenInput = document.getElementById('token');
+      const statusEl = document.getElementById('status');
+
+      function showStatus(type, message) {
+        statusEl.className = `status show ${type}`;
+        statusEl.textContent = message;
+      }
+
+      async function verify(token) {
+        try {
+          const res = await fetch(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Xác thực thất bại');
+          showStatus('success', data.message);
+        } catch (err) {
+          showStatus('error', err.message);
+        }
+      }
+
+      document.getElementById('verifyForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        verify(tokenInput.value.trim());
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (token) {
+        tokenInput.value = token;
+        verify(token);
+      }
+    </script>
+  </body>
+</html>

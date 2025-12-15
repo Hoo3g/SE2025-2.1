@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tạo Tài Khoản Mới</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      .signup-container {
+        width: 100%;
+        max-width: 600px;
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .signup-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+
+      .signup-header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 0.5rem;
+      }
+
+      .signup-header p {
+        color: #94a3b8;
+        font-size: 0.95rem;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .form-row.full {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(51, 65, 85, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        background: rgba(51, 65, 85, 0.7);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+      }
+
+      .form-group input::placeholder {
+        color: #64748b;
+      }
+
+      .password-requirement {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 0.5rem;
+      }
+
+      .password-wrapper {
+        position: relative;
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #0ea5e9;
+        font-size: 0.85rem;
+        background: none;
+        border: none;
+        padding: 0;
+        margin-top: 0.35rem;
+      }
+
+      .btn-signup {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #d946ef 0%, #c026d3 100%);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+      }
+
+      .btn-signup:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(217, 70, 239, 0.3);
+      }
+
+      .btn-signup:active {
+        transform: translateY(0);
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        color: #64748b;
+        font-size: 0.85rem;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(148, 163, 184, 0.2);
+      }
+
+      .btn-google {
+        width: 100%;
+        padding: 0.75rem;
+        background: rgba(51, 65, 85, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        color: #e2e8f0;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-google:hover {
+        background: rgba(51, 65, 85, 0.7);
+        border-color: rgba(148, 163, 184, 0.4);
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #94a3b8;
+        font-size: 0.9rem;
+      }
+
+      .login-link a {
+        color: #0ea5e9;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+
+      .login-link a:hover {
+        color: #06b6d4;
+      }
+
+      .error-message {
+        color: #ff6b6b;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      .success-message {
+        color: #4ade80;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+
+      .success-message.show {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="signup-container">
+      <div class="signup-header">
+        <h1>Tạo Tài Khoản Mới</h1>
+        <p>Đăng ký để bắt đầu</p>
+      </div>
+
+      <form id="signupForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">Họ và tên</label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              placeholder="Nguyễn Văn A"
+              required
+            />
+            <div class="error-message" id="firstNameError"></div>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Tên</label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              placeholder="A"
+              required
+            />
+            <div class="error-message" id="lastNameError"></div>
+          </div>
+        </div>
+
+        <div class="form-group form-row full">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="example@email.com"
+            required
+          />
+          <div class="error-message" id="emailError"></div>
+          <div class="error-message" id="emailExistsError"></div>
+        </div>
+
+        <div class="form-group form-row full">
+          <label for="phone">Số điện thoại</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="0912345678"
+            required
+          />
+          <div class="error-message" id="phoneError"></div>
+        </div>
+
+        <div class="form-group form-row full">
+          <label for="password">Mật khẩu</label>
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Nhập mật khẩu (ít nhất 8 ký tự)"
+              required
+            />
+            <button type="button" class="toggle-password" id="togglePassword">Hiển</button>
+          </div>
+          <div class="error-message" id="passwordError"></div>
+          <div class="password-requirement">Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ và số</div>
+        </div>
+
+        <div class="form-group form-row full">
+          <label for="confirmPassword">Xác nhận mật khẩu</label>
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Nhập lại mật khẩu"
+              required
+            />
+            <button type="button" class="toggle-password" id="toggleConfirmPassword">Hiển</button>
+          </div>
+          <div class="error-message" id="confirmPasswordError"></div>
+        </div>
+
+        <button type="submit" class="btn-signup">Đăng Ký</button>
+        <div class="error-message" id="formError"></div>
+        <div class="success-message" id="successMessage"></div>
+      </form>
+
+      <div class="divider">Hoặc</div>
+
+      <button type="button" class="btn-google" id="googleBtn">Đăng ký với Google</button>
+
+      <div class="login-link">
+        Đã có tài khoản? <a href="/login.html">Đăng nhập ngay</a>
+      </div>
+    </div>
+
+    <script>
+      const togglePasswordBtn = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+      const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPassword');
+      const confirmPasswordInput = document.getElementById('confirmPassword');
+
+      togglePasswordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        togglePasswordBtn.textContent = isPassword ? 'Ẩn' : 'Hiển';
+      });
+
+      toggleConfirmPasswordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isPassword = confirmPasswordInput.type === 'password';
+        confirmPasswordInput.type = isPassword ? 'text' : 'password';
+        toggleConfirmPasswordBtn.textContent = isPassword ? 'Ẩn' : 'Hiển';
+      });
+
+      const signupForm = document.getElementById('signupForm');
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Clear previous errors
+        document.querySelectorAll('.error-message, .success-message').forEach(el => el.classList.remove('show'));
+
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // Validation
+        if (!firstName) {
+          document.getElementById('firstNameError').textContent = 'Vui lòng nhập họ và tên';
+          document.getElementById('firstNameError').classList.add('show');
+          return;
+        }
+
+        if (!lastName) {
+          document.getElementById('lastNameError').textContent = 'Vui lòng nhập tên';
+          document.getElementById('lastNameError').classList.add('show');
+          return;
+        }
+
+        if (!email) {
+          document.getElementById('emailError').textContent = 'Vui lòng nhập email';
+          document.getElementById('emailError').classList.add('show');
+          return;
+        }
+
+        if (!phone) {
+          document.getElementById('phoneError').textContent = 'Vui lòng nhập số điện thoại';
+          document.getElementById('phoneError').classList.add('show');
+          return;
+        }
+
+        if (password.length < 8) {
+          document.getElementById('passwordError').textContent = 'Mật khẩu phải có ít nhất 8 ký tự';
+          document.getElementById('passwordError').classList.add('show');
+          return;
+        }
+
+        if (!/(?=.*[A-Za-z])(?=.*\d)/.test(password)) {
+          document.getElementById('passwordError').textContent = 'Mật khẩu phải chứa chữ và số';
+          document.getElementById('passwordError').classList.add('show');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          document.getElementById('confirmPasswordError').textContent = 'Mật khẩu không khớp';
+          document.getElementById('confirmPasswordError').classList.add('show');
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              first_name: firstName,
+              last_name: lastName,
+              email,
+              phone_number: phone,
+              password,
+            }),
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Đăng ký thất bại');
+          }
+
+          document.getElementById('successMessage').textContent = 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.';
+          document.getElementById('successMessage').classList.add('show');
+
+          // Reset form
+          signupForm.reset();
+
+          // Redirect after 2 seconds
+          setTimeout(() => {
+            window.location.href = '/login.html';
+          }, 2000);
+        } catch (err) {
+          if (err.message.includes('Email already exists')) {
+            document.getElementById('emailExistsError').textContent = 'Email này đã tồn tại';
+            document.getElementById('emailExistsError').classList.add('show');
+          } else {
+            document.getElementById('formError').textContent = err.message;
+            document.getElementById('formError').classList.add('show');
+          }
+        }
+      });
+
+      // Google signup button
+      document.getElementById('googleBtn').addEventListener('click', () => {
+        window.location.href = '/auth/google';
+      });
+    </script>
+  </body>
+</html>

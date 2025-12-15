@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thông Tin Cá Nhân</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+        color: #e2e8f0;
+      }
+
+      .layout {
+        min-height: 100vh;
+        display: flex;
+      }
+
+      .sidebar {
+        width: 280px;
+        background: rgba(30, 41, 59, 0.9);
+        border-right: 1px solid rgba(148, 163, 184, 0.08);
+        display: flex;
+        flex-direction: column;
+        padding: 2rem 0;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+      }
+
+      .sidebar-title {
+        padding: 0 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .sidebar-title h2 {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .sidebar-nav {
+        list-style: none;
+        flex: 1;
+      }
+
+      .sidebar-nav li {
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-nav a {
+        display: block;
+        padding: 0.75rem 1.5rem;
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+      }
+
+      .sidebar-nav a:hover,
+      .sidebar-nav a.active {
+        background: rgba(14, 165, 233, 0.12);
+        color: #e2e8f0;
+        border-left-color: #0ea5e9;
+      }
+
+      .sidebar-footer {
+        padding: 1.5rem;
+      }
+
+      .logout-btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+      }
+
+      .logout-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 2.5rem;
+        margin-left: 280px;
+      }
+
+      .settings-header {
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .settings-meta h1 {
+        font-size: 1.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .settings-meta p {
+        color: #94a3b8;
+      }
+
+      .settings-section {
+        background: rgba(30, 41, 59, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 16px;
+        padding: 2.2rem;
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+      }
+
+      .section-description {
+        color: #94a3b8;
+        font-size: 0.92rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .settings-section form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.4rem;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      label {
+        font-size: 0.9rem;
+        color: #cbd5e1;
+        margin-bottom: 0.4rem;
+      }
+
+      input {
+        padding: 0.85rem 1rem;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(51, 65, 85, 0.35);
+        color: #e2e8f0;
+        transition: border 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        background: rgba(51, 65, 85, 0.7);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+      }
+
+      .field-hint {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 0.35rem;
+      }
+
+      .upload-box {
+        border: 1px dashed rgba(148, 163, 184, 0.4);
+        border-radius: 16px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(51, 65, 85, 0.3);
+        margin-top: 0.25rem;
+      }
+
+      .upload-label {
+        padding: 0.75rem 1.25rem;
+        border-radius: 10px;
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        cursor: pointer;
+        background: rgba(8, 145, 178, 0.1);
+        color: #0ea5e9;
+        font-weight: 600;
+      }
+
+      .avatar-preview {
+        flex: 1;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+      }
+
+      .avatar-preview img {
+        max-height: 64px;
+        border-radius: 8px;
+        display: block;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .btn-primary {
+        padding: 0.85rem 1.6rem;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+      }
+
+      .status-message {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        display: none;
+      }
+
+      .status-message.show {
+        display: block;
+      }
+
+      .status-success {
+        color: #4ade80;
+      }
+
+      .status-error {
+        color: #f87171;
+      }
+
+      @media (max-width: 768px) {
+        .layout {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          border-right: none;
+          border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-title">
+          <h2>Cài Đặt Tài Khoản</h2>
+        </div>
+        <nav class="sidebar-nav">
+          <li><a href="/account-profile.html" class="active">Thông Tin Cá Nhân</a></li>
+          <li><a href="/account-security.html">Bảo Mật & Đăng Nhập</a></li>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="logout-btn" id="logoutBtn">Đăng Xuất</button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <div class="settings-header">
+          <div class="settings-meta">
+            <h1>Thông Tin Cá Nhân</h1>
+            <p>Cập nhật và quản lý thông tin cá nhân của bạn</p>
+          </div>
+          <div class="header-actions">
+            <button class="logout-btn" id="logoutBtnTop">Đăng Xuất</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h2 class="section-title">Hồ sơ của bạn</h2>
+          <p class="section-description">Điền đầy đủ thông tin để đồng bộ với các ứng dụng khác.</p>
+
+          <form id="personalForm">
+            <div class="form-group">
+              <label for="fullName">Họ và tên</label>
+              <input type="text" id="fullName" placeholder="Nhập họ và tên đầy đủ" required />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="dob">Ngày tháng năm sinh</label>
+                <input type="date" id="dob" />
+              </div>
+              <div class="form-group">
+                <label for="phone">Số điện thoại</label>
+                <input type="tel" id="phone" placeholder="0912345678" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="you@email.com" />
+            </div>
+
+            <div class="form-group">
+              <label for="avatarInput">Ảnh đại diện</label>
+              <div class="upload-box">
+                <input type="file" id="avatarInput" accept="image/*" hidden />
+                <label class="upload-label" for="avatarInput">Tải ảnh lên từ máy</label>
+                <div id="avatarPreview" class="avatar-preview">Chưa có ảnh</div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Lưu thông tin</button>
+            <div class="status-message status-error" id="personalError"></div>
+            <div class="status-message status-success" id="personalSuccess"></div>
+          </form>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const tokenFromQuery = params.get('token');
+      if (tokenFromQuery) {
+        setCookie('token', tokenFromQuery, 1);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+
+      function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+      }
+
+      function getCookie(name) {
+        return document.cookie.split('; ').reduce((r, v) => {
+          const parts = v.split('=');
+          return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+        }, '');
+      }
+
+      const token = getCookie('token');
+      if (!token) {
+        window.location.href = '/login.html?redirect_url=' + encodeURIComponent(window.location.href);
+      }
+
+      function handleLogout() {
+        setCookie('token', '', -1);
+        window.location.href = '/login.html';
+      }
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      const topBtn = document.getElementById('logoutBtnTop');
+      if (topBtn) topBtn.addEventListener('click', handleLogout);
+
+      const fullNameInput = document.getElementById('fullName');
+      const dobInput = document.getElementById('dob');
+      const emailInput = document.getElementById('email');
+      const phoneInput = document.getElementById('phone');
+      const avatarInput = document.getElementById('avatarInput');
+      const avatarPreview = document.getElementById('avatarPreview');
+      let avatarData = null;
+
+      function updateAvatarPreview(src) {
+        if (src) {
+          avatarPreview.innerHTML = `<img src="${src}" alt="Avatar" />`;
+        } else {
+          avatarPreview.textContent = 'Chưa có ảnh';
+        }
+      }
+
+      avatarInput.addEventListener('change', () => {
+        const file = avatarInput.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          avatarData = reader.result;
+          updateAvatarPreview(avatarData);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      function splitFullName(name) {
+        const parts = name.trim().split(/\s+/);
+        if (parts.length === 1) {
+          return { first: parts[0], last: '' };
+        }
+        const last = parts.pop();
+        return { first: parts.join(' '), last };
+      }
+
+      const personalForm = document.getElementById('personalForm');
+      personalForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.status-message').forEach(el => el.classList.remove('show'));
+
+        const fullName = fullNameInput.value.trim();
+        if (!fullName) {
+          document.getElementById('personalError').textContent = 'Vui lòng nhập họ và tên';
+          document.getElementById('personalError').classList.add('show');
+          return;
+        }
+
+        const nameParts = splitFullName(fullName);
+        const payload = {
+          first_name: nameParts.first,
+          last_name: nameParts.last,
+          email: emailInput.value.trim(),
+          phone_number: phoneInput.value.trim(),
+        };
+
+        if (dobInput.value) {
+          payload.date_of_birth = new Date(dobInput.value).toISOString();
+        }
+        if (avatarData) {
+          payload.avatar = avatarData;
+        }
+
+        try {
+          const res = await fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) throw new Error('Không thể cập nhật hồ sơ');
+          document.getElementById('personalSuccess').textContent = 'Cập nhật thành công!';
+          document.getElementById('personalSuccess').classList.add('show');
+        } catch (err) {
+          document.getElementById('personalError').textContent = err.message;
+          document.getElementById('personalError').classList.add('show');
+        }
+      });
+
+      fetch('/api/user/profile', {
+        headers: { Authorization: 'Bearer ' + token },
+      })
+        .then(r => r.json())
+        .then((data) => {
+          const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ').trim();
+          fullNameInput.value = fullName;
+          emailInput.value = data.email || '';
+          phoneInput.value = data.phone_number || '';
+          if (data.date_of_birth) {
+            dobInput.value = data.date_of_birth.slice(0, 10);
+          }
+          if (data.avatar) {
+            avatarData = data.avatar;
+            updateAvatarPreview(avatarData);
+          }
+        });
+    </script>
+  </body>
+</html>

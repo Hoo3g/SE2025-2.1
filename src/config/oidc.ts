@@ -37,10 +37,11 @@ export const oidcConfig: Configuration = {
   // TTL cho token
   ttl: {
     AccessToken: 60 * 60,          // 1 giờ
-    AuthorizationCode: 10 * 60,    // 10 phút
+    AuthorizationCode: 30 * 60,    // 30 phút
     IdToken: 60 * 60,              // 1 giờ
     DeviceCode: 10 * 60,           // 10 phút
     RefreshToken: 30 * 24 * 60 * 60, // 30 ngày
+    Session: 24 * 60 * 60,         // 24 giờ
   },
 
   // JWKS (DEV ONLY: không hard-code private key ở prod)

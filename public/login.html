@@ -1,32 +1,364 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sign In</title>
+    <title>Đăng Nhập</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+
+      .login-container {
+        width: 100%;
+        max-width: 500px;
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .login-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+
+      .login-header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 0.5rem;
+      }
+
+      .login-header p {
+        color: #94a3b8;
+        font-size: 0.95rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(51, 65, 85, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #0ea5e9;
+        background: rgba(51, 65, 85, 0.7);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+      }
+
+      .form-group input::placeholder {
+        color: #64748b;
+      }
+
+      .password-wrapper {
+        position: relative;
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #0ea5e9;
+        font-size: 0.85rem;
+        background: none;
+        border: none;
+        padding: 0;
+        margin-top: 0.35rem;
+      }
+
+      .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 1.5rem 0;
+        gap: 1rem;
+      }
+
+      .form-actions label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      .form-actions input[type="checkbox"] {
+        width: auto;
+        cursor: pointer;
+      }
+
+      .forgot-password {
+        color: #0ea5e9;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+      }
+
+      .forgot-password:hover {
+        color: #06b6d4;
+      }
+
+      .btn-login {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+      }
+
+      .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(14, 165, 233, 0.3);
+      }
+
+      .btn-login:active {
+        transform: translateY(0);
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        color: #64748b;
+        font-size: 0.85rem;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(148, 163, 184, 0.2);
+      }
+
+      .btn-google {
+        width: 100%;
+        padding: 0.75rem;
+        background: rgba(51, 65, 85, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 8px;
+        color: #e2e8f0;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-google:hover {
+        background: rgba(51, 65, 85, 0.7);
+        border-color: rgba(148, 163, 184, 0.4);
+      }
+
+      .signup-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #94a3b8;
+        font-size: 0.9rem;
+      }
+
+      .signup-link a {
+        color: #0ea5e9;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+
+      .signup-link a:hover {
+        color: #06b6d4;
+      }
+
+      .error-message {
+        color: #ff6b6b;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+    </style>
   </head>
   <body>
-    <h1>Sign In</h1>
-    <form method="POST" action="/auth/signin">
-      <label>Email: <input name="email" type="email" required /></label>
-      <br />
-      <label>Password: <input name="password" type="password" required /></label>
-      <br />
-      <!-- The server expects a redirect_url; default to the current host's /dashboard -->
-      <input type="hidden" name="redirect_url" value="" id="redirectUrl" />
-      <button type="submit">Sign In</button>
-    </form>
+    <div class="login-container">
+      <div class="login-header">
+        <h1>Đăng Nhập</h1>
+        <p>Đăng nhập để tiếp tục</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="example@email.com"
+            required
+          />
+          <div class="error-message" id="emailError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              required
+            />
+            <button type="button" class="toggle-password" id="togglePassword">Hiển</button>
+          </div>
+          <div class="error-message" id="passwordError"></div>
+        </div>
+
+        <div class="form-actions">
+          <label>
+            <input type="checkbox" id="rememberMe" name="rememberMe" />
+            Ghi nhớ đăng nhập
+          </label>
+          <a href="/forgot-password" class="forgot-password">Quên mật khẩu?</a>
+        </div>
+
+        <button type="submit" class="btn-login">Đăng Nhập</button>
+        <div class="error-message" id="formError"></div>
+      </form>
+
+      <div class="divider">Hoặc</div>
+
+      <button type="button" class="btn-google" id="googleBtn">Đăng nhập với Google</button>
+
+      <div class="signup-link">
+        Chưa có tài khoản? <a href="/signup.html">Đăng ký ngay</a>
+      </div>
+    </div>
 
     <script>
-      // Fill redirect URL for the signin form
-      (function() {
-        const redirectInput = document.getElementById('redirectUrl');
-        const redirect = new URL(window.location.href);
-        // If a redirect_url query param is present from the server, use it; else support older 'redirect' param and default to /dashboard
-        const searchParams = new URLSearchParams(window.location.search);
-        const redirectFromQuery = searchParams.get('redirect_url') || searchParams.get('redirect');
-        redirectInput.value = redirectFromQuery || (location.origin + '/dashboard');
-      })();
+      // Get URL params for redirect
+      const params = new URLSearchParams(window.location.search);
+      const redirectUrl = params.get('redirect_url') || '/account-profile.html';
+
+      // Helper: get/set cookie
+      function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
+      }
+
+      function getCookie(name) {
+        return document.cookie.split('; ').reduce((r, v) => {
+          const parts = v.split('=');
+          return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+        }, '');
+      }
+
+      // Toggle password visibility
+      const togglePasswordBtn = document.getElementById('togglePassword');
+      const passwordInput = document.getElementById('password');
+
+      togglePasswordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        togglePasswordBtn.textContent = isPassword ? 'Ẩn' : 'Hiển';
+      });
+
+      // Form submission
+      const loginForm = document.getElementById('loginForm');
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const rememberMe = document.getElementById('rememberMe').checked;
+
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+
+        try {
+          const response = await fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email,
+              password,
+              redirect_url: redirectUrl,
+            }),
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Đăng nhập thất bại');
+          }
+
+          // Save token to cookie if remember me is checked
+          if (rememberMe) {
+            const url = new URL(response.url || redirectUrl);
+            const token = url.searchParams.get('token');
+            if (token) {
+              setCookie('token', token, 7); // 7 days
+            }
+          }
+
+          // Redirect on success
+          window.location.href = response.url || redirectUrl;
+        } catch (err) {
+          document.getElementById('formError').textContent = err.message;
+          document.getElementById('formError').classList.add('show');
+        }
+      });
+
+      // Google login button
+      document.getElementById('googleBtn').addEventListener('click', () => {
+        window.location.href = '/auth/google';
+      });
+
     </script>
   </body>
-  </html>
+</html>
+<!doctype html>

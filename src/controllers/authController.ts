@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { userService } from "../services/userService.js";
 import { sendVerifyEmail } from "../auth/email.js";
 import { issueToken } from "../services/tokenService.js";
+import { BASE_URL } from "../config.js";
 
 
 export const authController = {
@@ -13,11 +14,11 @@ export const authController = {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
-    // Kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ và số
-      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    // Kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ và số. Cho phép ký tự đặc biệt.
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
       if (!passwordRegex.test(password)) {
         return res.status(400).json({
-          error: "Password must be at least 8 characters long and contain both letters and numbers",
+          error: "Mật khẩu phải có ít nhất 8 ký tự và chứa cả chữ và số",
         });
       }
 
@@ -36,7 +37,12 @@ export const authController = {
         phoneNumber:phone_number
       });
 
-      await sendVerifyEmail(user.email, token);
+      try {
+        await sendVerifyEmail(user.email, token);
+      } catch (emailErr) {
+        console.warn('Failed to send verification email:', emailErr);
+        // Don't fail signup if email fails to send - user can still verify later
+      }
 
       res.status(201).json({
         message: "Signup successful! Please check your email to verify your account.",
@@ -61,7 +67,9 @@ export const authController = {
       const token = await issueToken({ id: user.id_user, email: user.email });
 
       // redirect về redirect_url kèm token
-      const url = new URL(redirect_url);
+      const url = redirect_url.startsWith('http://') || redirect_url.startsWith('https://')
+        ? new URL(redirect_url)
+        : new URL(redirect_url, BASE_URL);
       url.searchParams.set("token", token);
 
       return res.redirect(url.toString());
@@ -73,12 +81,15 @@ export const authController = {
   async verifyEmail(req: Request, res: Response) {
     try {
       const token = req.query.token as string;
-      if (!token) return res.status(400).send("Missing token");
+      if (!token) return res.status(400).json({ error: "Missing token" });
 
       const user = await userService.verifyEmail(token);
-      res.send(`Email verified successfully for ${user.email}! You can now login.`);
+      res.json({
+        message: "Email verified successfully! You can now login.",
+        email: user.email,
+      });
     } catch (err: any) {
-      res.status(400).send(`Verification failed: ${err.message}`);
+      res.status(400).json({ error: err.message || "Verification failed" });
     }
   },
 };

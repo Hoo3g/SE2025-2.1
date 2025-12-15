@@ -1,31 +1,251 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+        color: #e2e8f0;
+        padding: 2rem;
+      }
+
+      .navbar {
+        max-width: 1200px;
+        margin: 0 auto 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        padding: 1rem 2rem;
+        border-radius: 12px;
+      }
+
+      .navbar h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .navbar-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+
+      .navbar-links a {
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .navbar-links a:hover {
+        color: #0ea5e9;
+      }
+
+      .navbar-links button {
+        padding: 0.5rem 1rem;
+        background: #dc2626;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .navbar-links button:hover {
+        background: #b91c1c;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .dashboard-header {
+        margin-bottom: 2rem;
+      }
+
+      .dashboard-header h2 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .dashboard-header p {
+        color: #94a3b8;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .card {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        border-color: rgba(14, 165, 233, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .card h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .card p {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+
+      .card a {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        border-radius: 6px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .card a:hover {
+        transform: translateY(-2px);
+      }
+
+      .figma-section {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 2rem;
+      }
+
+      .figma-section h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .figma-section p {
+        color: #94a3b8;
+        margin-bottom: 1rem;
+      }
+
+      .figma-embed-wrapper {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 56.25%;
+        background: rgba(51, 65, 85, 0.3);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-top: 1rem;
+      }
+
+      .figma-embed-wrapper iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+
+      .figma-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        text-align: center;
+        color: #94a3b8;
+      }
+    </style>
   </head>
   <body>
-    <h1>Dashboard</h1>
-    <div id="status">Loading...</div>
-    <button id="logoutBtn">Log out</button>
+    <nav class="navbar">
+      <h1>Dashboard</h1>
+      <div class="navbar-links">
+        <a href="/account-profile.html">Cài Đặt</a>
+        <a href="#" id="userLink">Hồ sơ</a>
+        <button id="logoutBtn">Đăng Xuất</button>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="dashboard-header">
+        <h2 id="greeting">Chào mừng bạn trở lại!</h2>
+        <p id="status">Loading...</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card">
+          <h3>👤 Thông Tin Tài Khoản</h3>
+          <p>Quản lý thông tin cá nhân và cài đặt tài khoản của bạn</p>
+          <a href="/account-profile.html">Truy cập</a>
+        </div>
+
+        <div class="card">
+          <h3>🔒 Bảo Mật</h3>
+          <p>Quản lý mật khẩu, xác thực và thiết bị đã đăng nhập</p>
+          <a href="/account-security.html">Cài đặt bảo mật</a>
+        </div>
+
+        <div class="card">
+          <h3>📋 Giao Diện Thiết Kế</h3>
+          <p>Xem prototype và thiết kế của dự án</p>
+          <a href="#figmaSection">Xem ngay</a>
+        </div>
+      </div>
+
+      <div class="figma-section" id="figmaSection">
+        <h3>🎨 Giao Diện Thiết Kế (Figma)</h3>
+        <p>Prototype và thiết kế từ Figma</p>
+        <div id="figmaArea">
+          <div class="figma-embed-wrapper" id="figmaWrapper">
+            <div class="figma-placeholder">Tải giao diện thiết kế...</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
       function setCookie(name, value, days) {
         const expires = new Date(Date.now() + days * 864e5).toUTCString();
         document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
       }
+
       function getCookie(name) {
         return document.cookie.split('; ').reduce((r, v) => {
           const parts = v.split('=');
-          return parts[0] === name ? decodeURIComponent(parts[1]) : r
+          return parts[0] === name ? decodeURIComponent(parts[1]) : r;
         }, '');
       }
 
-      (function() {
+      function initDashboard() {
+        const FIGMA_EMBED_URL = 'https://margin-faux-67212804.figma.site';
+
         const tokenFromQuery = new URLSearchParams(window.location.search).get('token');
         if (tokenFromQuery) {
-          // Store token in cookie and remove query param from URL
           setCookie('token', tokenFromQuery, 1);
           const cleanUrl = window.location.origin + window.location.pathname;
           history.replaceState({}, '', cleanUrl);
@@ -33,19 +253,29 @@
 
         const token = getCookie('token');
         if (!token) {
-          // Redirect to login page and let the server ask for a redirect_url param
-          window.location.href = '/auth/login?redirect_url=' + encodeURIComponent(window.location.href);
+          window.location.href = '/login.html?redirect_url=' + encodeURIComponent(window.location.href);
           return;
         }
 
-        // We have a token, show a simple authenticated UI
-        document.getElementById('status').textContent = 'You are logged in!';
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-          // Delete cookie and go to logout route
+        document.getElementById('status').textContent = 'Bạn đã đăng nhập thành công!';
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
           setCookie('token', '', -1);
-          window.location.href = '/auth/login?redirect=' + encodeURIComponent(window.location.origin + '/dashboard');
+          window.location.href = '/login.html';
         });
-      })();
+
+        if (FIGMA_EMBED_URL) {
+          const wrapper = document.getElementById('figmaWrapper');
+          const iframe = document.createElement('iframe');
+          iframe.src = FIGMA_EMBED_URL;
+          iframe.allow = 'clipboard-read; clipboard-write; encrypted-media; fullscreen;';
+          iframe.title = 'Figma Prototype';
+          wrapper.innerHTML = '';
+          wrapper.appendChild(iframe);
+        }
+      }
+
+      initDashboard();
     </script>
   </body>
-  </html>
+</html>

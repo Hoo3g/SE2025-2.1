@@ -226,12 +226,12 @@
       <form id="signupForm">
         <div class="form-row">
           <div class="form-group">
-            <label for="firstName">Họ và tên</label>
+            <label for="firstName">Họ</label>
             <input
               type="text"
               id="firstName"
               name="firstName"
-              placeholder="Nguyễn Văn A"
+              placeholder="Nguyễn Văn"
               required
             />
             <div class="error-message" id="firstNameError"></div>
@@ -339,6 +339,36 @@
         toggleConfirmPasswordBtn.textContent = isPassword ? 'Ẩn' : 'Hiển';
       });
 
+      const passwordField = document.getElementById('password');
+      const confirmPasswordField = document.getElementById('confirmPassword');
+      const passwordError = document.getElementById('passwordError');
+      const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+      function validatePasswordField() {
+        const value = passwordField.value;
+        if (!passwordRegex.test(value)) {
+          passwordError.textContent = 'Mật khẩu phải có ít nhất 8 ký tự và chứa cả chữ và số';
+          passwordError.classList.add('show');
+          return false;
+        }
+        passwordError.classList.remove('show');
+        return true;
+      }
+
+      function validateConfirmPasswordField() {
+        if (confirmPasswordField.value !== passwordField.value) {
+          confirmPasswordError.textContent = 'Mật khẩu không khớp';
+          confirmPasswordError.classList.add('show');
+          return false;
+        }
+        confirmPasswordError.classList.remove('show');
+        return true;
+      }
+
+      passwordField.addEventListener('input', validatePasswordField);
+      confirmPasswordField.addEventListener('input', validateConfirmPasswordField);
+
       const signupForm = document.getElementById('signupForm');
       signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -378,21 +408,7 @@
           return;
         }
 
-        if (password.length < 8) {
-          document.getElementById('passwordError').textContent = 'Mật khẩu phải có ít nhất 8 ký tự';
-          document.getElementById('passwordError').classList.add('show');
-          return;
-        }
-
-        if (!/(?=.*[A-Za-z])(?=.*\d)/.test(password)) {
-          document.getElementById('passwordError').textContent = 'Mật khẩu phải chứa chữ và số';
-          document.getElementById('passwordError').classList.add('show');
-          return;
-        }
-
-        if (password !== confirmPassword) {
-          document.getElementById('confirmPasswordError').textContent = 'Mật khẩu không khớp';
-          document.getElementById('confirmPasswordError').classList.add('show');
+        if (!validatePasswordField() | !validateConfirmPasswordField()) {
           return;
         }
 

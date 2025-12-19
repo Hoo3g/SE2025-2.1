@@ -307,10 +307,6 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label for="dob">Ngày tháng năm sinh</label>
-                <input type="date" id="dob" />
-              </div>
-              <div class="form-group">
                 <label for="phone">Số điện thoại</label>
                 <input type="tel" id="phone" placeholder="0912345678" />
               </div>
@@ -372,7 +368,6 @@
       if (topBtn) topBtn.addEventListener('click', handleLogout);
 
       const fullNameInput = document.getElementById('fullName');
-      const dobInput = document.getElementById('dob');
       const emailInput = document.getElementById('email');
       const phoneInput = document.getElementById('phone');
       const avatarInput = document.getElementById('avatarInput');
@@ -427,9 +422,7 @@
           phone_number: phoneInput.value.trim(),
         };
 
-        if (dobInput.value) {
-          payload.date_of_birth = new Date(dobInput.value).toISOString();
-        }
+        // date_of_birth removed from profile
         if (avatarData) {
           payload.avatar = avatarData;
         }
@@ -462,9 +455,7 @@
           fullNameInput.value = fullName;
           emailInput.value = data.email || '';
           phoneInput.value = data.phone_number || '';
-          if (data.date_of_birth) {
-            dobInput.value = data.date_of_birth.slice(0, 10);
-          }
+          // date_of_birth removed from profile
           if (data.avatar) {
             avatarData = data.avatar;
             updateAvatarPreview(avatarData);

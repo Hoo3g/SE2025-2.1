@@ -1,6 +1,6 @@
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql" // hoặc postgresql nếu bạn dùng Postgres
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -24,7 +24,6 @@ model User {
   first_name  String
   email       String    @unique
   phone_number String
-  date_of_birth DateTime?
   role        Role
   avatar      String?
   status      Status

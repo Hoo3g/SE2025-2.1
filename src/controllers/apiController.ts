@@ -147,9 +147,6 @@ export const apiController = {
         last_name: user.last_name,
         phone_number: user.phone_number,
         avatar: user.avatar,
-        date_of_birth: userRecord.date_of_birth
-          ? new Date(userRecord.date_of_birth).toISOString()
-          : null,
         email_verified: user.status === 'ACTIVE'
       });
     } catch (error) {
@@ -171,16 +168,12 @@ export const apiController = {
         first_name: z.string().min(1, 'First name is required').optional(),
         last_name: z.string().min(1, 'Last name is required').optional(),
         phone_number: z.string().min(6, 'Phone is required').optional(),
-        avatar: z.string().optional(),
-        date_of_birth: z.string().optional()
+        avatar: z.string().optional()
       });
 
       const updates = updateSchema.parse(req.body);
       const data: any = {
         ...updates,
-        date_of_birth: updates.date_of_birth
-          ? new Date(updates.date_of_birth)
-          : null,
         avatar: updates.avatar || null,
       };
 
@@ -197,7 +190,6 @@ export const apiController = {
         last_name: user.last_name,
         phone_number: user.phone_number,
         avatar: user.avatar,
-        date_of_birth: userRecord.date_of_birth ? new Date(userRecord.date_of_birth).toISOString() : null,
         email_verified: user.status === 'ACTIVE'
       });
     } catch (error) {

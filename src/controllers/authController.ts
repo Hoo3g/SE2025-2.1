@@ -84,11 +84,20 @@ export const authController = {
       if (!token) return res.status(400).json({ error: "Missing token" });
 
       const user = await userService.verifyEmail(token);
-      res.json({
+      const wantsHtml = req.headers.accept?.includes('text/html');
+      if (wantsHtml) {
+        return res.redirect('/verify-email.html?verified=1');
+      }
+      return res.json({
         message: "Email verified successfully! You can now login.",
         email: user.email,
       });
     } catch (err: any) {
+      const wantsHtml = req.headers.accept?.includes('text/html');
+      if (wantsHtml) {
+        const error = encodeURIComponent(err.message || "Verification failed");
+        return res.redirect(`/verify-email.html?verified=0&error=${error}`);
+      }
       res.status(400).json({ error: err.message || "Verification failed" });
     }
   },

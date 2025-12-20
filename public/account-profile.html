@@ -301,8 +301,8 @@
 
           <form id="personalForm">
             <div class="form-group">
-              <label for="fullName">Họ</label>
-              <input type="text" id="fullName" placeholder="Nhập họ của bạn" required />
+              <label for="fullName">Họ và tên</label>
+              <input type="text" id="fullName" placeholder="Nhập họ và tên của bạn" required />
             </div>
 
             <div class="form-row">
@@ -373,6 +373,7 @@
       const avatarInput = document.getElementById('avatarInput');
       const avatarPreview = document.getElementById('avatarPreview');
       let avatarData = null;
+      const localProfileKey = 'accountProfileDraft';
 
       function updateAvatarPreview(src) {
         if (src) {
@@ -402,6 +403,37 @@
         return { first: parts.join(' '), last };
       }
 
+      function applyProfileData(data) {
+        const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ').trim();
+        fullNameInput.value = fullName;
+        emailInput.value = data.email || '';
+        phoneInput.value = data.phone_number || '';
+        if (data.avatar) {
+          avatarData = data.avatar;
+          updateAvatarPreview(avatarData);
+        }
+      }
+
+      function loadLocalProfile() {
+        try {
+          const raw = localStorage.getItem(localProfileKey);
+          return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function saveLocalProfile(payload) {
+        const cached = {
+          first_name: payload.first_name || '',
+          last_name: payload.last_name || '',
+          email: payload.email || '',
+          phone_number: payload.phone_number || '',
+          avatar: payload.avatar || '',
+        };
+        localStorage.setItem(localProfileKey, JSON.stringify(cached));
+      }
+
       const personalForm = document.getElementById('personalForm');
       personalForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -427,6 +459,8 @@
           payload.avatar = avatarData;
         }
 
+        saveLocalProfile(payload);
+
         try {
           const res = await fetch('/api/user/profile', {
             method: 'PUT',
@@ -450,15 +484,13 @@
         headers: { Authorization: 'Bearer ' + token },
       })
         .then(r => r.json())
-        .then((data) => {
-          const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ').trim();
-          fullNameInput.value = fullName;
-          emailInput.value = data.email || '';
-          phoneInput.value = data.phone_number || '';
-          // date_of_birth removed from profile
-          if (data.avatar) {
-            avatarData = data.avatar;
-            updateAvatarPreview(avatarData);
+                .then((data) => {
+          applyProfileData(data);
+        })
+        .catch(() => {
+          const cachedProfile = loadLocalProfile();
+          if (cachedProfile) {
+            applyProfileData(cachedProfile);
           }
         });
     </script>

@@ -1,7 +1,7 @@
 import { EMAIL_FROM } from '../config.js';
 
 export async function sendVerifyEmail(email: string, token: string) {
-  const verifyUrl = `${process.env.APP_URL}/verify-email.html?token=${token}`;
+  const verifyUrl = `${process.env.APP_URL}/auth/verify-email?token=${token}`;
   
   // TODO: Configure SMTP settings in .env
   // For now, just log the verification link instead of sending

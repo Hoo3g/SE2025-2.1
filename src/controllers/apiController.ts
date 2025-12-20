@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/jwt.js';
 
@@ -14,6 +15,13 @@ const refreshTokenSchema = z.object({
 const revokeTokenSchema = z.object({
   token: z.string().min(1, 'Token is required')
 });
+
+const changePasswordSchema = z.object({
+  current_password: z.string().min(1, 'Current password is required'),
+  new_password: z.string().min(8, 'New password must be at least 8 characters')
+});
+
+const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 
 export const apiController = {
   // Refresh token endpoint - follows OAuth 2.0/OIDC standards
@@ -192,6 +200,57 @@ export const apiController = {
         avatar: user.avatar,
         email_verified: user.status === 'ACTIVE'
       });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'invalid_request',
+          error_description: error.issues[0].message
+        });
+      }
+      res.status(500).json({
+        error: 'server_error',
+        error_description: 'An internal server error occurred'
+      });
+    }
+  },
+  changePassword: async (req: Request, res: Response) => {
+    try {
+      if (!req.user?.sub) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { current_password, new_password } = changePasswordSchema.parse(req.body);
+      if (!passwordRegex.test(new_password)) {
+        return res.status(400).json({
+          error: 'New password must be at least 8 characters and contain letters and numbers'
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id_user: Number(req.user.sub) }
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const ok = await bcrypt.compare(current_password, user.password);
+      if (!ok) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+
+      const sameAsOld = await bcrypt.compare(new_password, user.password);
+      if (sameAsOld) {
+        return res.status(400).json({ error: 'New password must be different from current password' });
+      }
+
+      const passwordHash = await bcrypt.hash(new_password, 10);
+      await prisma.user.update({
+        where: { id_user: user.id_user },
+        data: { password: passwordHash }
+      });
+
+      res.json({ message: 'Password updated successfully' });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({

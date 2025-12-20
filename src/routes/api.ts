@@ -9,6 +9,7 @@ router.use("/auth", authRoutes);
 
 router.get("/user/profile", verifyToken, apiController.getProfile);
 router.put("/user/profile", verifyToken, apiController.updateProfile);
+router.put("/user/password", verifyToken, apiController.changePassword);
 router.post("/token/refresh", apiController.refreshToken);
 router.post("/token/revoke", apiController.revokeToken);
 

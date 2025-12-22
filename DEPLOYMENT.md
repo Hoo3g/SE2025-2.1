@@ -132,3 +132,41 @@ docker compose -f docker/docker-compose.yml up -d
 npm run build
 npm start
 ```
+
+
+
+# SSH vào server
+ssh -i server-key.pem se2025_2_1@136.114.70.164
+
+# Vào thư mục project
+cd ~/oauth-server
+
+# Xem trạng thái
+npx pm2 status
+
+# Xem logs (real-time)
+npx pm2 logs oauth-server
+
+# Xem logs (30 dòng cuối)
+npx pm2 logs oauth-server --lines 30 --nostream
+
+# Restart server
+npx pm2 restart oauth-server
+
+# Stop server
+npx pm2 stop oauth-server
+
+# Start server
+npx pm2 start oauth-server
+
+# Delete process khỏi PM2
+npx pm2 delete oauth-server
+
+
+
+# SSH vào server
+ssh -i server-key.pem se2025_2_1@136.114.70.164
+
+# Setup PM2 startup (cần sudo)
+npx pm2 startup
+# Chạy lệnh mà PM2 gợi ý

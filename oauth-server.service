@@ -1,0 +1,21 @@
+[Unit]
+Description=OAuth Server
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=se2025_2_1
+WorkingDirectory=%h/oauth-server
+ExecStartPre=/usr/bin/docker compose -f %h/oauth-server/docker/docker-compose.yml up -d
+ExecStartPre=/bin/sleep 5
+ExecStartPre=/usr/bin/npx prisma db push --skip-generate
+ExecStart=/usr/bin/npm run dev
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=oauth-server
+
+[Install]
+WantedBy=multi-user.target

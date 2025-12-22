@@ -2,3 +2,6 @@
 node_modules/
 dist/
 docker/mysql_data
+DEPLOYMENT.md
+server-key.pem
+server-key.pub

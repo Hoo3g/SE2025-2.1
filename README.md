@@ -3,12 +3,13 @@
 ## 📋 Mục lục
 
 1. [Quick Start](#-quick-start)
-2. [Kết nối Server](#-kết-nối-server)
-3. [Deploy Code Mới](#-deploy-code-mới)
-4. [Xem Logs](#-xem-logs--monitor)
-5. [Quản lý Server](#-quản-lý-server-với-pm2)
-6. [Quản lý MySQL Database](#️-quản-lý-mysql-database)
-7. [Troubleshooting](#-troubleshooting)
+2. [Local Development](#-local-development-test-trên-máy)
+3. [Kết nối Server](#-kết-nối-server)
+4. [Deploy Code Mới](#-deploy-code-mới)
+5. [Xem Logs](#-xem-logs--monitor)
+6. [Quản lý Server](#-quản-lý-server-với-pm2)
+7. [Quản lý MySQL Database](#️-quản-lý-mysql-database)
+8. [Troubleshooting](#-troubleshooting)
 
 ---
 
@@ -29,6 +30,66 @@ chmod +x deploy-to-server.sh
 
 # 4. Deploy!
 ./deploy-to-server.sh
+```
+
+---
+
+## 💻 Local Development (Test trên máy)
+
+### Quick Start - Chạy local
+
+```bash
+# Tất cả trong một lệnh!
+npm run docker:start
+```
+
+Script này sẽ tự động:
+1. ✅ Khởi động MySQL container (Docker)
+2. ✅ Đợi MySQL sẵn sàng
+3. ✅ Sync database schema (Prisma)
+4. ✅ Chạy dev server (port 3000)
+
+Sau đó truy cập: **http://localhost:3000**
+
+### Các lệnh hữu ích khi dev
+
+```bash
+# Chỉ chạy dev server (MySQL đã khởi động)
+npm run dev
+
+# Sync database schema
+npm run db:push
+
+# Build production
+npm run build
+
+# Chạy production build
+npm start
+```
+
+### Kiểm tra MySQL local
+
+```bash
+# Kết nối MySQL
+docker exec -it mysql_oauth mysql -uroot asset3d_db
+
+# Xem tables
+docker exec -i mysql_oauth mysql -uroot asset3d_db -e "SHOW TABLES;"
+
+# Xem logs
+docker logs mysql_oauth
+```
+
+### Stop/Restart MySQL
+
+```bash
+cd docker
+
+# Stop
+docker compose down
+
+# Restart
+docker compose restart
 ```
 
 ---

@@ -675,7 +675,7 @@ Do oidc-provider cung cấp:
 - /session/end
 - /request
 
-# 8. Luồng xử lý chính (chi tiết)
+# 8. Luồng xử lý chính 
 ## 8.1 Luồng đăng ký
 1) Người dùng gửi form đăng ký.
 2) Backend validate dữ liệu, tạo user NOT_ACTIVE.

@@ -28,8 +28,8 @@ app.use(helmet({
   contentSecurityPolicy: false // TODO: Configure CSP properly
 }));
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: false, limit: '5mb' }));
 
 // Custom routes and static files
 app.use('/auth', authRouter);

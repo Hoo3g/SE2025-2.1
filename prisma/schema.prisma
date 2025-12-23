@@ -25,7 +25,6 @@ model User {
   email       String    @unique
   phone_number String
   role        Role
-  avatar      String?
   status      Status
   password    String
 

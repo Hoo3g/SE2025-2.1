@@ -180,10 +180,15 @@ export const apiController = {
       });
 
       const updates = updateSchema.parse(req.body);
-      const data: any = {
-        ...updates,
-        avatar: updates.avatar || null,
-      };
+      const data: any = { ...updates };
+      // Only set avatar if it was provided in the request. This prevents
+      // unintentionally clearing the stored avatar when the client doesn't
+      // include the field.
+      if (Object.prototype.hasOwnProperty.call(updates, 'avatar')) {
+        data.avatar = updates.avatar || null;
+      } else {
+        delete data.avatar;
+      }
 
       const user = await prisma.user.update({
         where: { id_user: Number(req.user.sub) },

@@ -318,13 +318,7 @@
             </div>
 
             <div class="form-group">
-              <label for="avatarInput">Ảnh đại diện</label>
-              <div class="upload-box">
-                <input type="file" id="avatarInput" accept="image/*" hidden />
-                <label class="upload-label" for="avatarInput">Tải ảnh lên từ máy</label>
-                <div id="avatarPreview" class="avatar-preview">Chưa có ảnh</div>
-              </div>
-            </div>
+              <!-- Avatar section removed -->
 
             <button type="submit" class="btn-primary">Lưu thông tin</button>
             <div class="status-message status-error" id="personalError"></div>
@@ -370,29 +364,8 @@
       const fullNameInput = document.getElementById('fullName');
       const emailInput = document.getElementById('email');
       const phoneInput = document.getElementById('phone');
-      const avatarInput = document.getElementById('avatarInput');
-      const avatarPreview = document.getElementById('avatarPreview');
-      let avatarData = null;
       const localProfileKey = 'accountProfileDraft';
 
-      function updateAvatarPreview(src) {
-        if (src) {
-          avatarPreview.innerHTML = `<img src="${src}" alt="Avatar" />`;
-        } else {
-          avatarPreview.textContent = 'Chưa có ảnh';
-        }
-      }
-
-      avatarInput.addEventListener('change', () => {
-        const file = avatarInput.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          avatarData = reader.result;
-          updateAvatarPreview(avatarData);
-        };
-        reader.readAsDataURL(file);
-      });
 
       function splitFullName(name) {
         const parts = name.trim().split(/\s+/);
@@ -408,10 +381,7 @@
         fullNameInput.value = fullName;
         emailInput.value = data.email || '';
         phoneInput.value = data.phone_number || '';
-        if (data.avatar) {
-          avatarData = data.avatar;
-          updateAvatarPreview(avatarData);
-        }
+        // avatar field removed from UI; keep other profile data
       }
 
       function loadLocalProfile() {
@@ -455,9 +425,6 @@
         };
 
         // date_of_birth removed from profile
-        if (avatarData) {
-          payload.avatar = avatarData;
-        }
 
         saveLocalProfile(payload);
 
@@ -471,11 +438,16 @@
             body: JSON.stringify(payload),
           });
 
-          if (!res.ok) throw new Error('Không thể cập nhật hồ sơ');
+          if (!res.ok) {
+            const body = await res.json().catch(() => null);
+            const msg = body?.error_description || body?.error || body?.message || `Không thể cập nhật hồ sơ (${res.status})`;
+            throw new Error(msg);
+          }
+
           document.getElementById('personalSuccess').textContent = 'Cập nhật thành công!';
           document.getElementById('personalSuccess').classList.add('show');
         } catch (err) {
-          document.getElementById('personalError').textContent = err.message;
+          document.getElementById('personalError').textContent = err?.message || String(err);
           document.getElementById('personalError').classList.add('show');
         }
       });

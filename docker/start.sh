@@ -30,7 +30,8 @@ sleep 3
 
 echo "📦 Syncing database schema..."
 cd "$PROJECT_DIR"
-npx prisma db push --skip-generate
+# Use Prisma CLI v6 to remain compatible with the `url` datasource in schema.prisma
+npx prisma@6.18.0 db push
 
 echo "✅ Database ready! Starting server..."
 npm run dev

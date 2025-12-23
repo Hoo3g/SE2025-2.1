@@ -220,6 +220,36 @@
       .header-actions {
         display: flex;
         gap: 0.75rem;
+        align-items: center;
+      }
+
+      .header-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: rgba(51, 65, 85, 0.5);
+        border: 2px solid rgba(14, 165, 233, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .header-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .header-avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 1.5rem;
       }
 
       .btn-primary {
@@ -291,6 +321,9 @@
             <p>Cập nhật và quản lý thông tin cá nhân của bạn</p>
           </div>
           <div class="header-actions">
+            <div class="header-avatar" id="headerAvatar">
+              <div class="header-avatar-placeholder">👤</div>
+            </div>
             <button class="logout-btn" id="logoutBtnTop">Đăng Xuất</button>
           </div>
         </div>
@@ -318,7 +351,13 @@
             </div>
 
             <div class="form-group">
-              <!-- Avatar section removed -->
+              <label for="avatarInput">Ảnh đại diện</label>
+              <div class="upload-box">
+                <input type="file" id="avatarInput" accept="image/*" hidden />
+                <label class="upload-label" for="avatarInput">Tải ảnh lên từ máy</label>
+                <div id="avatarPreview" class="avatar-preview">Chưa có ảnh</div>
+              </div>
+            </div>
 
             <button type="submit" class="btn-primary">Lưu thông tin</button>
             <div class="status-message status-error" id="personalError"></div>
@@ -365,6 +404,19 @@
       const emailInput = document.getElementById('email');
       const phoneInput = document.getElementById('phone');
       const localProfileKey = 'accountProfileDraft';
+      const avatarInput = document.getElementById('avatarInput');
+      const avatarPreview = document.getElementById('avatarPreview');
+      const headerAvatar = document.getElementById('headerAvatar');
+      let avatarData = null;
+
+      function updateHeaderAvatar(src) {
+        if (!headerAvatar) return;
+        if (src) {
+          headerAvatar.innerHTML = `<img src="${src}" alt="Avatar" />`;
+        } else {
+          headerAvatar.innerHTML = '<div class="header-avatar-placeholder">👤</div>';
+        }
+      }
 
 
       function splitFullName(name) {
@@ -376,12 +428,25 @@
         return { first: parts.join(' '), last };
       }
 
+      function updateAvatarPreview(src) {
+        if (!avatarPreview) return;
+        if (src) {
+          avatarPreview.innerHTML = `<img src="${src}" alt="Avatar" />`;
+        } else {
+          avatarPreview.textContent = 'Chưa có ảnh';
+        }
+      }
+
       function applyProfileData(data) {
         const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ').trim();
         fullNameInput.value = fullName;
         emailInput.value = data.email || '';
         phoneInput.value = data.phone_number || '';
-        // avatar field removed from UI; keep other profile data
+        if (data.avatar) {
+          avatarData = data.avatar;
+          updateAvatarPreview(avatarData);
+          updateHeaderAvatar(avatarData);
+        }
       }
 
       function loadLocalProfile() {
@@ -404,6 +469,51 @@
         localStorage.setItem(localProfileKey, JSON.stringify(cached));
       }
 
+      // Handle avatar file selection and preview
+      if (avatarInput) {
+        avatarInput.addEventListener('change', () => {
+          const file = avatarInput.files?.[0];
+          if (!file) return;
+          
+          // Validate file size (max 5MB)
+          const maxSizeMB = 5;
+          const maxSizeBytes = maxSizeMB * 1024 * 1024;
+          if (file.size > maxSizeBytes) {
+            document.getElementById('personalError').textContent = `Ảnh phải nhỏ hơn ${maxSizeMB}MB (file này là ${(file.size / 1024 / 1024).toFixed(2)}MB)`;
+            document.getElementById('personalError').classList.add('show');
+            avatarInput.value = '';
+            avatarData = null;
+            updateAvatarPreview(null);
+            return;
+          }
+          
+          // Validate file type
+          if (!file.type.startsWith('image/')) {
+            document.getElementById('personalError').textContent = 'Vui lòng chọn một file ảnh hợp lệ';
+            document.getElementById('personalError').classList.add('show');
+            avatarInput.value = '';
+            avatarData = null;
+            updateAvatarPreview(null);
+            return;
+          }
+          
+          const reader = new FileReader();
+          reader.onload = () => {
+            avatarData = reader.result;
+            document.getElementById('personalError').classList.remove('show');
+            updateAvatarPreview(avatarData);
+            updateHeaderAvatar(avatarData);
+          };
+          reader.onerror = () => {
+            document.getElementById('personalError').textContent = 'Lỗi khi đọc file ảnh';
+            document.getElementById('personalError').classList.add('show');
+            avatarData = null;
+            updateAvatarPreview(null);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
       const personalForm = document.getElementById('personalForm');
       personalForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -423,6 +533,10 @@
           email: emailInput.value.trim(),
           phone_number: phoneInput.value.trim(),
         };
+
+        if (avatarData) {
+          payload.avatar = avatarData;
+        }
 
         // date_of_birth removed from profile
 

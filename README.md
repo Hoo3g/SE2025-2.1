@@ -571,7 +571,7 @@ Cần giúp đỡ?
 **Happy Deploying! 🚀**
 
 
-﻿# Goals and Objectives
+# Goals and Objectives
 
 ## Mục tiêu tổng quát
 - Xây dựng hệ thống Identity Provider theo chuẩn OAuth 2.0 và OpenID Connect để quản lý danh tính người dùng tập trung.
